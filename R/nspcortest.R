@@ -1,6 +1,6 @@
 #' Nest spatial autocorrelation
 #'
-#' Perform multiple spatial autocorrelation tests within subsets of the data (e.g. islands) using permutations of individual observations. Particularly suited to designs with few samping sites per subset.
+#' Perform multiple spatial autocorrelation tests within subsets of the data (e.g. islands) using permutations of individual observations. Particularly suited to designs with few sampling sites per subset.
 #'
 #' @param data A data frame
 #' @param variables The variables to analyze

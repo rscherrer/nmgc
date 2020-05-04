@@ -586,3 +586,62 @@ remote: Resolving deltas:   0% (0/8)[Kremote: Resolving deltas:  12% (1/8)[K
 To github.com:rscherrer/DewlapColorAnolis
    20f9dd0..4e12db7  master -> master
 [K]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git add .
+]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git commit -m "keep argument to cor test"
+[master 4f61c09] keep argument to cor test
+ 54 files changed, 22 insertions(+), 3643 deletions(-)
+ rewrite .Rproj.user/39EEEED0/console06/INDEX001 (88%)
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/2CCFAEB0-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/32FD7492-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/341DAD01-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/3C739CAD-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/3D3B6832-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/3F389695-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/40BC237B-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/42AC15AC-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/4BC1D453-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/4E986CED-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/556F427B-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/6785DCB6-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/71D848FB-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/732CE34E-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/75A8D9A3-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/7ED1ED15-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/89CAD482-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/8C81CB04-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/8D31E538-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/958F45E7
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/958F45E7-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/A174FF93-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/A599E3EB-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/A7922F5F-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/AF2F5538-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/B322840D-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/B467910B-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/BA43EF2A-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/BC0CBA37-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/BE3CF76E-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/C0D19FA8-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/C4F368A4-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/D32BD5BE-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/D5EEF45B-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/E6FC854E-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/EBBEC698
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/EBBEC698-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/F1D3C693-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/F6D9223B-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/F9649882
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/F9649882-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/FB982A0B-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/FF290E10-contents
+ delete mode 100644 .Rproj.user/39EEEED0/sources/s-ADB2FAC3/lock_file
+ create mode 100644 .gitignore
+]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git push
+Counting objects: 20, done.
+Delta compression using up to 8 threads.
+Compressing objects:   5% (1/17)   Compressing objects:  11% (2/17)   Compressing objects:  17% (3/17)   Compressing objects:  23% (4/17)   Compressing objects:  29% (5/17)   Compressing objects:  35% (6/17)   Compressing objects:  41% (7/17)   Compressing objects:  47% (8/17)   Compressing objects:  52% (9/17)   Compressing objects:  58% (10/17)   Compressing objects:  64% (11/17)   Compressing objects:  70% (12/17)   Compressing objects:  76% (13/17)   Compressing objects:  82% (14/17)   Compressing objects:  88% (15/17)   Compressing objects:  94% (16/17)   Compressing objects: 100% (17/17)   Compressing objects: 100% (17/17), done.
+Writing objects:   5% (1/20)   Writing objects:  10% (2/20)   Writing objects:  15% (3/20)   Writing objects:  20% (4/20)   Writing objects:  25% (5/20)   Writing objects:  30% (6/20)   Writing objects:  35% (7/20)   Writing objects:  40% (8/20)   Writing objects:  45% (9/20)   Writing objects:  50% (10/20)   Writing objects:  55% (11/20)   Writing objects:  60% (12/20)   Writing objects:  65% (13/20)   Writing objects:  70% (14/20)   Writing objects:  75% (15/20)   Writing objects:  80% (16/20)   Writing objects:  85% (17/20)   Writing objects:  90% (18/20)   Writing objects:  95% (19/20)   Writing objects: 100% (20/20)   Writing objects: 100% (20/20), 1.80 KiB | 461.00 KiB/s, done.
+Total 20 (delta 14), reused 0 (delta 0)
+remote: Resolving deltas:   0% (0/14)[Kremote: Resolving deltas:   7% (1/14)[Kremote: Resolving deltas:  14% (2/14)[Kremote: Resolving deltas:  21% (3/14)[Kremote: Resolving deltas:  28% (4/14)[Kremote: Resolving deltas:  35% (5/14)[Kremote: Resolving deltas:  42% (6/14)[Kremote: Resolving deltas:  50% (7/14)[Kremote: Resolving deltas:  57% (8/14)[Kremote: Resolving deltas:  64% (9/14)[Kremote: Resolving deltas:  71% (10/14)[Kremote: Resolving deltas:  78% (11/14)[Kremote: Resolving deltas:  85% (12/14)[Kremote: Resolving deltas:  92% (13/14)[Kremote: Resolving deltas: 100% (14/14)[Kremote: Resolving deltas: 100% (14/14), completed with 14 local objects.[K
+To github.com:rscherrer/nmgc
+   b17da02..4f61c09  master -> master
+]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git add .
