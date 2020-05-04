@@ -1,0 +1,83 @@
+# Spatial autocorrelation by permutation test
+
+rm(list = ls())
+
+library(geosphere)
+library(tidyverse)
+library(pbapply)
+library(knitr)
+
+# How many permutations?
+nperm <- 1000
+
+# Random seed
+set.seed(42)
+
+# Read phenotypic data
+data <- read.csv("data/pca_islands.csv", header = TRUE)
+
+# Sampling site data
+sites <- data %>%
+  group_by(island, longitude, latitude) %>%
+  dplyr::select(paste0("PC", 1:4)) %>%
+  summarize_all(mean)
+
+# Make a nice table
+sites
+write.csv(sites, "analyses/spatial correlation/sites.csv", row.names = FALSE)
+kable(sites, digits = c(0, 2, 2, 2, 2, 2, 2), format = "latex")
+
+# Split the datasets by islands
+data <- split(data, data$island)
+sites <- split(sites, sites$island)
+
+set.seed(42)
+
+# For each island...
+autocordata <- t(pbsapply(names(data), function(island) {
+
+  data <- data[[island]]
+  sites <- sites[[island]]
+
+  # Calculate geographic distances between sites
+  geodist <- c(as.dist(distm(sites[, c("longitude", "latitude")], fun = distGeo)))
+
+  # Phenotypic distance between sites
+  phedist <- c(as.dist(dist(sites[, paste0("PC", 1:4)])))
+
+  # Pearson's correlation coefficient
+  robs <- cor(geodist, phedist)
+
+  # For each permutation...
+  rperms <- sapply(seq_len(nperm), function(i) {
+
+    # Reshuffle individuals across sites
+    permuted <- sample(nrow(data), nrow(data), replace = FALSE)
+    data$site <- data$site[permuted]
+
+    # Recompute the average phenotype per site
+    sites <- data %>%
+      group_by(site) %>%
+      summarize_at(paste0("PC", 1:4), mean)
+
+    # Recompute the phenotypic distance between sites
+    phedist <- c(as.dist(dist(sites[, paste0("PC", 1:4)])))
+
+    # Calculate the correlation between locations and randmized phenotypes
+    cor(geodist, phedist)
+
+  })
+
+  # Compute the P-value
+  pvalue <- length(which(rperms > robs)) / nperm
+
+  c(robs = robs, pvalue = pvalue)
+
+})) %>%
+  data.frame() %>%
+  mutate(nsites = sapply(sites, nrow), island = names(sites))
+
+autocordata <- autocordata[, c("island", "nsites", "robs", "pvalue")]
+
+write.csv(autocordata, "analyses/spatial correlation/spatial_correlation.csv", row.names = FALSE)
+kable(autocordata, digits = c(0, 0, 3, 3), format = "latex")

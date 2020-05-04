@@ -1,0 +1,64 @@
+#' Nested principal component analysis
+#'
+#' Perform principal component analyses across multiple subsets of the data
+#'
+#' @param data A data frame
+#' @param variables The variables to analyze
+#' @param center Whether to center the data
+#' @param scale Whether to scale the data
+#' @param nesting Optional nesting factor indicating the subsets. Defaults to NULL, where the output is that of a regular call to `prcomp`
+#' @param combine If `nesting` is provided, whether to combine the results for the different subsets.
+#' @param reduce If `combine` is TRUE, what principal components to retain from across the subsets.
+#'
+#' @return If `nesting` is NULL, the same as `prcomp`, otherwise, if `combine` is FALSE, a nested list of `prcomp` outputs, one for each subset. If `combine` is TRUE, a list of three data frames:
+#' \itemize{
+#' \item{`sdev`}{Contains the standard deviations along each principal component for each subset}
+#' \item{`rotation`}{Contains the rotation matrices for each subset, bound by row}
+#' \item{`x`}{The scores of each observation on each principal component}
+#' }
+#'
+#' @export
+
+npcomp <- function(data, variables, center = TRUE, scale = TRUE, nesting = NULL, combine = TRUE, reduce = NULL) {
+
+  library(tidyverse)
+
+  if (is.null(nesting)) data <- list(data) else data <- data %>% split(.[[nesting]])
+  data <- data %>% map(~ .x %>% dplyr::select(all_of(variables)) %>% prcomp(center = center, scale = scale))
+
+  if (is.null(nesting)) return(data[[1]])
+
+  out <- data
+
+  if (combine) {
+
+    fields <- c("sdev", "rotation", "x")
+    names(fields) <- fields
+    out <- fields %>% map(function(field) {
+      out <- data %>%
+        map(
+          ~ .x[[field]] %>%
+            rbind %>%
+            data.frame %>%
+            rename_all(str_replace, "X", "PC") %>%
+            dplyr::select(all_of(reduce)) %>%
+            rownames_to_column
+        ) %>%
+        map2(names(.), ~ .x %>% mutate(nesting = .y)) %>%
+        do.call("rbind", .) %>%
+        remove_rownames()
+      if (field != "rotation") out <- out %>% dplyr::select(-rowname)
+      out <- out %>% .[, c(ncol(.), 1:(ncol(.) - 1))]
+      colnames(out) <- colnames(out) %>%
+        str_replace("nesting", nesting) %>%
+        str_replace("rowname", "variable")
+
+      return (out)
+
+    })
+
+  }
+
+  return(out)
+
+}

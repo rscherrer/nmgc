@@ -1,0 +1,36 @@
+rm(list = ls())
+
+library(nmgc)
+library(tidyverse)
+
+data <- read.csv("data/reflectance.csv", header = TRUE)
+
+# Keep the most significant islands only
+
+data <- data %>%
+  filter(island %in% c("Abaco", "Bimini", "Cayman Brac", "Little Cayman", "Long Island")) %>%
+  droplevels
+
+variables <- paste0("PC", 1:4)
+
+# First fit a MANOVA and test its assumptions
+
+res_manova <- nanova(
+  data, variables, grouping = "habitat", nesting = "island", to_pcomp = paste0("wl", 300:700),
+  manova = TRUE, test = "Wilks"
+)
+
+res_manova$anova # MANOVA table
+res_manova$assum$multinorm # Multivariate normality
+res_manova$assum$cov # Homogeneity of covariance matrices
+res_manova$assum$outliers %>% map(~ .x %>% do.call("c", .)) %>% do.call("c", .) # Outliers
+
+# Then fit multiple ANOVAs
+
+res_anova <- nanova(
+  data, variables, grouping = "habitat", nesting = "island", to_pcomp = paste0("wl", 300:700),
+  posthoc = TRUE, assumptions = FALSE
+)
+
+head(res_anova)
+

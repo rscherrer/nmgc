@@ -1,0 +1,32 @@
+##### Analyze the variance explained by each PC #####
+
+rm(list = ls())
+
+library(nmgc)
+library(tidyverse)
+library(knitr)
+
+input <- "data/reflectance.csv"
+output <- "analyses/PCA/pca_variances.csv"
+variables <- paste0("wl", 300:700)
+
+data <- read.csv(input, header = TRUE)
+
+# Extract explained variances
+pcvariances <- fit_nested_pca(data, variables, nesting = "island", PCs = 1:4, output = "variances")
+pcvariances <- data.frame(do.call("rbind", pcvariances))
+colnames(pcvariances) <- paste0("PC", 1:4)
+pcvariances <- pcvariances %>% rownames_to_column("island")
+pcvariances$total <- apply(pcvariances %>% dplyr::select(PC1:PC4), 1, sum)
+
+# Append the explained variances for the whole archipelago
+extra <- prcomp(data %>% dplyr::select(wl300:wl700) %>% as.matrix())
+extra <- with(extra, sdev[1:4] / sum(sdev))
+extra <- c(extra, sum(extra))
+pcvariances <- data.frame(
+  island = c(pcvariances$island, "Archipelago"),
+  rbind(pcvariances %>% dplyr::select(PC1:total), extra)
+)
+
+kable(pcvariances, digits = 3, format = "latex") # latex version used in the manuscript
+write.csv(pcvariances, output, row.names = FALSE)

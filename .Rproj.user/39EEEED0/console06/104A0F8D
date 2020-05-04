@@ -1,0 +1,105 @@
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ [K]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ git add 
+Nothing specified, nothing added.
+Maybe you wanted to say 'git add .'?
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ git add .
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ git commit m[K-m "new ackage, [K[K[K[K[K[K[K[Kpackage, a single machine learngin[K[K[K[Kning functi on"
+[master 8a0a8b7] new package, a single machine learning function
+ 10 files changed, 392 insertions(+)
+ create mode 100644 nmgc/.Rbuildignore
+ create mode 100644 nmgc/DESCRIPTION
+ create mode 100644 nmgc/NAMESPACE
+ create mode 100644 nmgc/R/machine_learning.R
+ create mode 100644 nmgc/R/nested_anovas.R
+ create mode 100644 nmgc/R/nested_pca.R
+ create mode 100644 nmgc/R/nested_pca_variances.R
+ create mode 100644 nmgc/man/hello.Rd
+ create mode 100644 nmgc/man/nested_anovas.Rd
+ create mode 100644 nmgc/nmgc.Rproj
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ git push
+Counting objects: 8, done.
+Delta compression using up to 8 threads.
+Compressing objects:  12% (1/8)   Compressing objects:  25% (2/8)   Compressing objects:  37% (3/8)   Compressing objects:  50% (4/8)   Compressing objects:  62% (5/8)   Compressing objects:  75% (6/8)   Compressing objects:  87% (7/8)   Compressing objects: 100% (8/8)   Compressing objects: 100% (8/8), done.
+Writing objects:  12% (1/8)   Writing objects:  25% (2/8)   Writing objects:  37% (3/8)   Writing objects:  50% (4/8)   Writing objects:  62% (5/8)   Writing objects:  75% (6/8)   Writing objects:  87% (7/8)   Writing objects: 100% (8/8)   Writing objects: 100% (8/8), 3.26 KiB | 3.26 MiB/s, done.
+Total 8 (delta 1), reused 0 (delta 0)
+remote: Resolving deltas:   0% (0/1)[Kremote: Resolving deltas: 100% (1/1)[Kremote: Resolving deltas: 100% (1/1), completed with 1 local object.[K
+To github.com:rscherrer/DewlapColorAnolis
+   5c32f4b..8a0a8b7  master -> master
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ [K]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmmgc[00m$ [K[A]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ git add .
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ git commit -m "bert[K[Ktter nested pca function"
+[master 43ef96f] better nested pca function
+ 5 files changed, 161 insertions(+), 34 deletions(-)
+ rewrite nmgc/R/nested_pca.R (68%)
+ create mode 100644 nmgc/man/machine_learning.Rd
+ create mode 100644 nmgc/man/nested_pca.Rd
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ git push
+Counting objects: 10, done.
+Delta compression using up to 8 threads.
+Compressing objects:  10% (1/10)   Compressing objects:  20% (2/10)   Compressing objects:  30% (3/10)   Compressing objects:  40% (4/10)   Compressing objects:  50% (5/10)   Compressing objects:  60% (6/10)   Compressing objects:  70% (7/10)   Compressing objects:  80% (8/10)   Compressing objects:  90% (9/10)   Compressing objects: 100% (10/10)   Compressing objects: 100% (10/10), done.
+Writing objects:  10% (1/10)   Writing objects:  20% (2/10)   Writing objects:  30% (3/10)   Writing objects:  40% (4/10)   Writing objects:  50% (5/10)   Writing objects:  60% (6/10)   Writing objects:  70% (7/10)   Writing objects:  80% (8/10)   Writing objects:  90% (9/10)   Writing objects: 100% (10/10)   Writing objects: 100% (10/10), 2.75 KiB | 940.00 KiB/s, done.
+Total 10 (delta 5), reused 0 (delta 0)
+remote: Resolving deltas:   0% (0/5)[Kremote: Resolving deltas:  20% (1/5)[Kremote: Resolving deltas:  40% (2/5)[Kremote: Resolving deltas:  60% (3/5)[Kremote: Resolving deltas:  80% (4/5)[Kremote: Resolving deltas: 100% (5/5)[Kremote: Resolving deltas: 100% (5/5), completed with 5 local objects.[K
+To github.com:rscherrer/DewlapColorAnolis
+   8a0a8b7..43ef96f  master -> master
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ git add .
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ git commit -m "sy[Kimplified functions"
+[master 2c9acf9] simplified functions
+ 4 files changed, 3 insertions(+), 29 deletions(-)
+ rename nmgc/R/{machine_learning.R => fit_machine_learning.R} (99%)
+ rename nmgc/R/{nested_anovas.R => fit_nested_anovas.R} (98%)
+ rename nmgc/R/{nested_pca.R => fit_nested_pca.R} (98%)
+ delete mode 100644 nmgc/R/nested_pca_variances.R
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ git push
+^SCounting objects: 7, done.
+Delta compression using up to 8 threads.
+Compressing objects:  14% (1/7)   Compressing objects:  28% (2/7)   Compressing objects:  42% (3/7)   Compressing objects:  57% (4/7)   Compressing objects:  71% (5/7)   Compressing objects:  85% (6/7)   Compressing objects: 100% (7/7)   Compressing objects: 100% (7/7), done.
+Writing objects:  14% (1/7)   Writing objects:  28% (2/7)   Writing objects:  42% (3/7)   Writing objects:  57% (4/7)   Writing objects:  71% (5/7)   Writing objects:  85% (6/7)   Writing objects: 100% (7/7)   Writing objects: 100% (7/7), 4.60 KiB | 1.53 MiB/s, done.
+Total 7 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas:   0% (0/2)[Kremote: Resolving deltas:  50% (1/2)[Kremote: Resolving deltas: 100% (2/2)[Kremote: Resolving deltas: 100% (2/2), completed with 2 local objects.[K
+To github.com:rscherrer/DewlapColorAnolis
+   43ef96f..2c9acf9  master -> master
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ cd ..
+]0;/home/raphael/Documents/DewlapColorAnolis]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis[00m$ cp -r data nmgc
+]0;/home/raphael/Documents/DewlapColorAnolis]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis[00m$ cd nmgc
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ mkdir scripts
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ [K]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ mkdir figures
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ mkdir tables
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ [K]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ mkdir rds
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ [K]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ cd ..
+]0;/home/raphael/Documents/DewlapColorAnolis]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis[00m$ cp scripts/plot_reflectance_spectra.R ng[Kmgc/scripts/
+]0;/home/raphael/Documents/DewlapColorAnolis]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis[00m$ 
+]0;/home/raphael/Documents/DewlapColorAnolis]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis[00m$ ls script
+ls: cannot access 'script': No such file or directory
+]0;/home/raphael/Documents/DewlapColorAnolis]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis[00m$ ls[K[Kcd scripts
+]0;/home/raphael/Documents/DewlapColorAnolis/scripts]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/scripts[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/scripts[00m$ ls
+analysis_of_variance.R          plot_analysis_of_variance.R     plot_rotation_matrices.R        spatial_autocorrelation.R
+brightness.R                    plot_classification_accuracy.R  plot_whole_archipelago.R        support_vector_machines.R
+extract_geographical_data.R     plot_confusion_matrices.R       principal_component_analysis.R  whole_archipelago.R
+linear_discriminant_analysis.R  plot_principal_components.R     sensitivity_analysis_nested.R
+make_maps.R                     plot_reflectance_spectra.R      sensitivity_analysis.R
+]0;/home/raphael/Documents/DewlapColorAnolis/scripts]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/scripts[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/scripts[00m$ [K]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/scripts[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/scripts[00m$ ls
+analysis_of_variance.R          plot_analysis_of_variance.R     plot_rotation_matrices.R        spatial_autocorrelation.R
+brightness.R                    plot_classification_accuracy.R  plot_whole_archipelago.R        support_vector_machines.R
+extract_geographical_data.R     plot_confusion_matrices.R       principal_component_analysis.R  whole_archipelago.R
+linear_discriminant_analysis.R  plot_principal_components.R     sensitivity_analysis_nested.R
+make_maps.R                     plot_reflectance_spectra.R      sensitivity_analysis.R
+]0;/home/raphael/Documents/DewlapColorAnolis/scripts]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/scripts[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/scripts[00m$ cp plot_confusion_matrices.R ../ngm[K[Kmgc/scripts/
+]0;/home/raphael/Documents/DewlapColorAnolis/scripts]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/scripts[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/scripts[00m$ [K]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/scripts[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/scripts[00m$ cd ..
+]0;/home/raphael/Documents/DewlapColorAnolis]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis[00m$ cd nmgc/
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ mkdir plots
+]0;/home/raphael/Documents/DewlapColorAnolis/nmgc]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/nmgc[00m$ cd ..
+]0;/home/raphael/Documents/DewlapColorAnolis]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis[00m$ cd scripts/
+]0;/home/raphael/Documents/DewlapColorAnolis/scripts]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/scripts[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/scripts[00m$ ls
+analysis_of_variance.R          make_maps.R                     plot_principal_components.R  principal_component_analysis.R  support_vector_machines.R
+brightness.R                    plot_analysis_of_variance.R     plot_reflectance_spectra.R   sensitivity_analysis_nested.R   whole_archipelago.R
+extract_geographical_data.R     plot_classification_accuracy.R  plot_rotation_matrices.R     sensitivity_analysis.R
+linear_discriminant_analysis.R  plot_confusion_matrices.R       plot_whole_archipelago.R     spatial_autocorrelation.R
+]0;/home/raphael/Documents/DewlapColorAnolis/scripts]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/scripts[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/scripts[00m$ cp plot_classification_accuracy.R ../nmgc/scripts/
+[K]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/scripts[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/scripts[00m$ git push
+To github.com:rscherrer/DewlapColorAnolis
+ ! [rejected]        master -> master (non-fast-forward)
+error: failed to push some refs to 'git@github.com:rscherrer/DewlapColorAnolis'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Integrate the remote changes (e.g.
+hint: 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+]0;/home/raphael/Documents/DewlapColorAnolis/scripts]0;raphael@unidesktop: ~/Documents/DewlapColorAnolis/scripts[01;32mraphael@unidesktop[00m:[01;34m~/Documents/DewlapColorAnolis/scripts[00m$ 

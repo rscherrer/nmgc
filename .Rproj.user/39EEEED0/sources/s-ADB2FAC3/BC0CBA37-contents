@@ -1,0 +1,132 @@
+# This script produced all the confusion matrices used in this study
+
+rm(list = ls())
+
+library(nmgc)
+
+# Set-up the different analyses
+geoscales <- c("IS", "AW")
+datatypes <- c("PCA", "REFL")
+methods <- c("SVM", "LDA")
+
+analyses <- expand.grid(geoscales, datatypes, methods)
+
+# Prepare sets of variables to use for each data type
+variables <- list(PCA = paste0("PC", 1:4), REFL = paste0("wl", seq(300, 700, 50)))
+
+# Graphical settings
+rel_heights <- list(IS = c(1, 1, 1), AW = c(1, 3, 1))
+rel_widths <- list(IS = c(2, 1), AW = c(1, 1))
+histoplot_dims <- list(IS = c(9, 6), AW = c(6, 3))
+mtxplot_dims <- list(IS = c(6, 6), AW = c(3, 2.2))
+dheights <- list(IS = 500, AW = 2000)
+color <- list(SVM = "seagreen", LDA = "coral")
+
+# Global parameters
+importance <- FALSE # it does not work on Archipelago and I have no idea why
+
+# Read the data
+data <- read.csv("data/reflectance_islands.csv", header = TRUE)
+
+# For each analysis
+lapply(seq(nrow(analyses)), function(i) {
+
+  # Specifications of the current analysis
+  geoscale <- analyses[i, 1]
+  datatype <- analyses[i, 2]
+  method <- analyses[i, 3]
+
+  message(sprintf("Performing machine learning analysis %s: %s %s %s", i, method, datatype, geoscale))
+
+  # Where to save the outputs
+  cmoutput <- sprintf("analyses/machine learning/confusion matrices/CM_%s_%s_%s.rds", method, datatype, geoscale)
+  impoutput <- sprintf("analyses/machine learning/importances/IMP_%s_%s_%s.rds", method, datatype, geoscale)
+
+  # Erase islands if archipelago-wide analysis
+  if (geoscale == "AW") data$island <- "Archipelago"
+
+  # Make PCA dataset if needed
+  if (datatype == "PCA") data <- make_nested_pca_dataset(
+    data,
+    variables$REFL,
+    nesting = "island",
+    PCs = as.numeric(gsub("PC", "", variables$PCA)),
+    append = c("island", "habitat")
+  )
+
+  # Keep only the variables of interest
+  variables <- variables[[datatype]]
+
+  # Perform a classification analysis: train machines and test them
+  confusions <- fit_nested_machine_learning(
+    data,
+    variables,
+    nesting = "island",
+    grouping = "habitat",
+    method = method,
+    k = 5,
+    nrep = 100,
+    seed = 42
+  )
+
+  # The output is a nested list (one list per island) of two-level confusion matrix
+  # arrays, which are arrays of confusion matrices across replicates and
+  # ccross-validation bins
+
+  saveRDS(confusions, cmoutput)
+
+  # Post-process the output of the classification
+  nested <- lapply(confusions, cm2_process, ptest = 0.2, p = 1/3, normalize = 2)
+
+  # Assemble data frames for plotting
+  accudata <- assemble_accuracy_df(nested)
+  nulldata <- assemble_null_df(nested)
+  pdata <- assemble_pvalue_df(nested)
+  cmdata <- assemble_avgcm_df(nested)
+
+  # Plot histograms of succesful assignments, extended with inset plots, null distribution and P-values
+  histoplot <- plot_classification_histogram(accudata, nulldata, pdata, cmdata, color = color[[method]], dheight = dheights[[geoscale]], rounding = 4, signif = 0.05, facets = "nesting")
+
+  # Plot confusion matrices
+  xlab <-"Predicted habitat"
+  ylab <- "True habitat"
+  example <- ifelse(geoscale == "IS", "Cayman Brac", "Archipelago") # choose an example for the legend
+  lgdplot <- plot_confusion_matrix(cmdata %>% filter(nesting == example), xlab = xlab, ylab = ylab) # for the legend
+  mtxplot <- plot_confusion_matrix(cmdata, facets = "nesting", xlab = xlab, ylab = ylab)
+
+  # Save plot
+  mtxplot_dims <- mtxplot_dims[[geoscale]]
+  mtxplot_filename <- sprintf("analyses/machine learning/plots/confusion_%s_%s_%s.png", method, datatype, geoscale)
+  ggsave(mtxplot_filename, mtxplot, width = mtxplot_dims[1], height = mtxplot_dims[2], dpi = 300)
+
+  # Combine the histograms with the legend
+  blank <- ggplot() + theme_void()
+  lgdplot <- plot_grid(blank, lgdplot, blank, rel_heights = rel_heights[[geoscale]], nrow = 3)
+  histoplot <- plot_grid(histoplot, lgdplot, rel_widths = rel_widths[[geoscale]], ncol = 2)
+
+  # Save plot
+  histoplot_dims <- histoplot_dims[[geoscale]]
+  histoplot_filename <- sprintf("analyses/machine learning/plots/histogram_%s_%s_%s.png", method, datatype, geoscale)
+  ggsave(histoplot_filename, histoplot, width = histoplot_dims[1], height = histoplot_dims[2], dpi = 300)
+
+  # Perform sensitivity analyses on the fitted machines (this takes a very long time)
+  if (importance) {
+
+    message("Sensitivity analysis")
+
+    importances <- fit_nested_machine_learning(
+      data,
+      variables,
+      nesting = "island",
+      grouping = "habitat",
+      method = method,
+      k = 5,
+      nrep = 100,
+      seed = 42,
+      importance = TRUE
+    )
+    saveRDS(importances, sprintf("analyses/machine learning/importances/IMP_%s_%s_%s.rds", method, datatype, geoscale))
+
+  }
+
+})
