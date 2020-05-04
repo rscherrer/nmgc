@@ -16,7 +16,8 @@ nspcortest(
   pb = TRUE,
   to_pcomp = NULL,
   center = TRUE,
-  scale = TRUE
+  scale = TRUE,
+  keep = NULL
 )
 }
 \arguments{
@@ -39,6 +40,8 @@ nspcortest(
 \item{to_pcomp}{Variable to perform PCA on}
 
 \item{center, scale}{Parameters for \code{npcomp}}
+
+\item{keep}{Optional factor to keep in the \code{sites} data frame returned}
 }
 \value{
 A list with two data frames: one with the results of the correlation test on each subset, including observed Pearson's correlation, P-values and number of sites, and the second with the geographical coordinates and means of each trait for every site in the data.

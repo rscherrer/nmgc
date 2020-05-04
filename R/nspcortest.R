@@ -12,13 +12,14 @@
 #' @param pb Whether to display progress bars
 #' @param to_pcomp Variable to perform PCA on
 #' @param center,scale Parameters for `npcomp`
+#' @param keep Optional factor to keep in the `sites` data frame returned
 #'
 #' @return A list with two data frames: one with the results of the correlation test on each subset, including observed Pearson's correlation, P-values and number of sites, and the second with the geographical coordinates and means of each trait for every site in the data.
 
 nspcortest <- function(
   data, variables, nesting = NULL, nperm = 1000, seed = NULL, lon = "longitude",
   lat = "latitude", verbose = TRUE, pb = TRUE, to_pcomp = NULL, center = TRUE,
-  scale = TRUE
+  scale = TRUE, keep = NULL
 ) {
 
   # Spatial autocorrelation by permutation test
@@ -46,7 +47,7 @@ nspcortest <- function(
 
   # Sampling site data (return this one)
   sites <- data %>%
-    group_by_at(c(nesting, lon, lat)) %>%
+    group_by_at(c(nesting, lon, lat, keep)) %>%
     dplyr::select(variables) %>%
     summarize_all(mean)
 
