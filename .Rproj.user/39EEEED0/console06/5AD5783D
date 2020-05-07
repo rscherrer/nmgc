@@ -645,3 +645,17 @@ remote: Resolving deltas:   0% (0/14)[Kremote: Resolving deltas:   7% (1/14)[
 To github.com:rscherrer/nmgc
    b17da02..4f61c09  master -> master
 ]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git add .
+]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git commit - m[K[Km "typo"
+[master 75af00e] typo
+ 5 files changed, 67 insertions(+), 8 deletions(-)
+ rewrite .Rproj.user/39EEEED0/console06/INDEX001 (87%)
+]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git push
+Counting objects: 11, done.
+Delta compression using up to 8 threads.
+Compressing objects:   9% (1/11)   Compressing objects:  18% (2/11)   Compressing objects:  27% (3/11)   Compressing objects:  36% (4/11)   Compressing objects:  45% (5/11)   Compressing objects:  54% (6/11)   Compressing objects:  63% (7/11)   Compressing objects:  72% (8/11)   Compressing objects:  81% (9/11)   Compressing objects:  90% (10/11)   Compressing objects: 100% (11/11)   Compressing objects: 100% (11/11), done.
+Writing objects:   9% (1/11)   Writing objects:  18% (2/11)   Writing objects:  27% (3/11)   Writing objects:  36% (4/11)   Writing objects:  45% (5/11)   Writing objects:  54% (6/11)   Writing objects:  63% (7/11)   Writing objects:  72% (8/11)   Writing objects:  81% (9/11)   Writing objects:  90% (10/11)   Writing objects: 100% (11/11)   Writing objects: 100% (11/11), 1.89 KiB | 323.00 KiB/s, done.
+Total 11 (delta 8), reused 0 (delta 0)
+remote: Resolving deltas:   0% (0/8)[Kremote: Resolving deltas:  12% (1/8)[Kremote: Resolving deltas:  25% (2/8)[Kremote: Resolving deltas:  37% (3/8)[Kremote: Resolving deltas:  50% (4/8)[Kremote: Resolving deltas:  62% (5/8)[Kremote: Resolving deltas:  75% (6/8)[Kremote: Resolving deltas:  87% (7/8)[Kremote: Resolving deltas: 100% (8/8)[Kremote: Resolving deltas: 100% (8/8), completed with 8 local objects.[K
+To github.com:rscherrer/nmgc
+   4f61c09..75af00e  master -> master
+]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ [K]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ [K]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ [K]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ 
