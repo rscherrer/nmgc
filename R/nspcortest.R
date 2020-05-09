@@ -13,6 +13,7 @@
 #' @param to_pcomp Variable to perform PCA on
 #' @param center,scale Parameters for `npcomp`
 #' @param keep Optional factor to keep in the `sites` data frame returned
+#' @param add_signif Whether to add significance asterisk labels in an extra column
 #'
 #' @return A list with two data frames: one with the results of the correlation test on each subset, including observed Pearson's correlation, P-values and number of sites, and the second with the geographical coordinates and means of each trait for every site in the data.
 
@@ -101,6 +102,10 @@ nspcortest <- function(
 
     }, .id = nesting) %>%
     mutate(nsites = sapply(sites, nrow))
+
+  if (add_signif) {
+    res <- res %>% add_signif()
+  }
 
   out <- list(res = res, sites = out)
 

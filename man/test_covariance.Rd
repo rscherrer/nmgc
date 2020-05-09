@@ -14,6 +14,8 @@ test_covariance(d, variables, grouping, nesting = NULL)
 \item{grouping}{Grouping variable}
 
 \item{nesting}{Nesting variable}
+
+\item{add_signif}{Whether to add significance asterisk labels in an extra column}
 }
 \value{
 A data frame with the chi-square statistics, degrees of freedom and P-value of Box's M-test performed between groups within each subset

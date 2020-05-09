@@ -44,6 +44,8 @@ nanova(
 \item{univariate}{Whether to test for multiple univariate normality instead of multivariate normality. See \code{?test_multinorm}}
 
 \item{kw}{Whether to perform Kruskal-Wallis tests instead of ANOVAs}
+
+\item{add_signif}{Whether to add significance asterisk labels in an extra column}
 }
 \value{
 If \code{manova} is FALSE, data frame containing the results of the ANOVAs for each variable and each subset of the data, including:

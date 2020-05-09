@@ -16,6 +16,8 @@ test_multinorm(d, variables, grouping, nesting = NULL, univariate = FALSE)
 \item{nesting}{Nesting variable}
 
 \item{univariate}{Special option to return the results of multiple univariate Sharpiro tests}
+
+\item{add_signif}{Whether to add significance asterisk labels in an extra column}
 }
 \value{
 A data frame with HZ statistics and P-values for each group in each subset, or a data frame with W statistics and P-values for each variable in each group and each subset, if \code{univariate} is TRUE.

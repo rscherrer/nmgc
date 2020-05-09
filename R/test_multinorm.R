@@ -7,6 +7,7 @@
 #' @param grouping Grouping variable
 #' @param nesting Nesting variable
 #' @param univariate Special option to return the results of multiple univariate Sharpiro tests
+#' @param add_signif Whether to add significance asterisk labels in an extra column
 #'
 #' @return A data frame with HZ statistics and P-values for each group in each subset, or a data frame with W statistics and P-values for each variable in each group and each subset, if `univariate` is TRUE.
 #'
@@ -62,6 +63,9 @@ test_multinorm <- function(d, variables, grouping, nesting = NULL, univariate = 
   res[[nesting]] <- gsub("\\.[0-9]", "", rownames(res))
   rownames(res) <- NULL
   res <- res[, c(nesting, grouping, "HZ", "pvalue")]
+
+  if (add_signif) res <- res %>% add_signif()
+
   return (res)
 
 }

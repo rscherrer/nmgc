@@ -20,6 +20,7 @@
 #' @param to_pcomp Variable to perform PCA on
 #' @param center Center the PCA
 #' @param scale Scale the PCA
+#' @param add_signif Whether to add significance asterisk labels in an extra column
 #'
 #' @return A list containing the results. If `digest` is `FALSE`, a nested list on two levels with, for each replicate (first level) cross-validation bin (second level), i.e. for each machine, the following fields:
 #' \itemize{
@@ -200,6 +201,7 @@ classify <- function(
           ntest = floor(ptest * n),
           pvalue = 1 - pbinom(accu * ntest, size = ntest, prob = 1 / length(labels))
         )
+      if (add_signif) mean <- mean %>% add_signif()
     }
 
     return (list(mean = mean, avg = avg, accu = accu, confs = confs, imp = imp))

@@ -6,6 +6,7 @@
 #' @param variables What variables to test?
 #' @param grouping Grouping variable
 #' @param nesting Nesting variable
+#' @param add_signif Whether to add significance asterisk labels in an extra column
 #'
 #' @return A data frame with the chi-square statistics, degrees of freedom and P-value of Box's M-test performed between groups within each subset
 #'
@@ -32,6 +33,8 @@ test_covariance <- function(d, variables, grouping, nesting = NULL) {
   res <- res %>% rownames_to_column(nesting)
 
   colnames(res) <- c(nesting, "chisq", "df", "pvalue")
+
+  if (add_signif) res <- res %>% add_signif()
 
   return (res)
 

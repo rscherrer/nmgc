@@ -42,10 +42,12 @@ nspcortest(
 \item{center, scale}{Parameters for \code{npcomp}}
 
 \item{keep}{Optional factor to keep in the \code{sites} data frame returned}
+
+\item{add_signif}{Whether to add significance asterisk labels in an extra column}
 }
 \value{
 A list with two data frames: one with the results of the correlation test on each subset, including observed Pearson's correlation, P-values and number of sites, and the second with the geographical coordinates and means of each trait for every site in the data.
 }
 \description{
-Perform multiple spatial autocorrelation tests within subsets of the data (e.g. islands) using permutations of individual observations. Particularly suited to designs with few samping sites per subset.
+Perform multiple spatial autocorrelation tests within subsets of the data (e.g. islands) using permutations of individual observations. Particularly suited to designs with few sampling sites per subset.
 }

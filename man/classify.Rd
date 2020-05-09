@@ -61,6 +61,8 @@ classify(
 \item{center}{Center the PCA}
 
 \item{scale}{Scale the PCA}
+
+\item{add_signif}{Whether to add significance asterisk labels in an extra column}
 }
 \value{
 A list containing the results. If \code{digest} is \code{FALSE}, a nested list on two levels with, for each replicate (first level) cross-validation bin (second level), i.e. for each machine, the following fields:

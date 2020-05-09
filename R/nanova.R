@@ -14,6 +14,7 @@
 #' @param assumptions Whether to perform tests of assumptions for the MANOVA
 #' @param univariate Whether to test for multiple univariate normality instead of multivariate normality. See `?test_multinorm`
 #' @param kw Whether to perform Kruskal-Wallis tests instead of ANOVAs
+#' @param add_signif Whether to add significance asterisk labels in an extra column
 #'
 #' @details The analysis of variance is performed using a likelihood ratio test between a model including the factor of interest and a null model with intercept only. The LRT is done with models fitted with maximum likelihood. Model comparison between OLS and GLS is done with models fitted with restricted maximum likelihood, that include the factor to be tested (as per Zuur et al. 2009).
 #'
@@ -81,6 +82,11 @@ nanova <- function(
       outliers = test_outliers(data, variables, grouping, nesting)
     )
 
+    if (add_signif) {
+      assum$multinorm <- assum$multinorm %>% add_signif()
+      assum$cov <- assum$cov %>% add_signif()
+    }
+
   }
 
   # For each island...
@@ -100,6 +106,8 @@ nanova <- function(
       ) %>%
         rename(chisq = "statistic", df = "parameter", pvalue = "p.value")
     }, .id = nesting)
+
+    if (add_signif) out <- out %>% add_signif()
 
     if (assumptions) out <- list(kw = out, assum = assum)
 
@@ -231,6 +239,8 @@ nanova <- function(
     if (posthoc) levels(anovadata$posthoc_test) <- c("Tukey", "Wilcoxon")
 
   }
+
+  if (add_signif) anovadata <- anovadata %>% add_signif()
 
   if (assumptions) anovadata <- list(anova = anovadata, assum = assum)
 
