@@ -8,8 +8,7 @@ add_signif(
   df,
   pcol = "pvalue",
   thresholds = c(0.05, 0.01, 0.001),
-  labels = c("*", "**", "***"),
-  colname = ""
+  labels = c("*", "**", "***")
 )
 }
 \arguments{
@@ -20,8 +19,6 @@ add_signif(
 \item{thresholds}{A vector of P-value thresholds, in decreasing order}
 
 \item{labels}{A vector of labels, one for each threshold}
-
-\item{colname}{Optional name of the significance label column. Defaults to none}
 }
 \value{
 A data frame
