@@ -17,7 +17,8 @@ nanova(
   test = "Pillai",
   assumptions = TRUE,
   univariate = FALSE,
-  kw = FALSE
+  kw = FALSE,
+  add_signif = TRUE
 )
 }
 \arguments{

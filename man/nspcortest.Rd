@@ -17,7 +17,8 @@ nspcortest(
   to_pcomp = NULL,
   center = TRUE,
   scale = TRUE,
-  keep = NULL
+  keep = NULL,
+  add_signif = TRUE
 )
 }
 \arguments{

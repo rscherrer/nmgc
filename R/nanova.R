@@ -56,7 +56,7 @@
 nanova <- function(
   data, variables, grouping, nesting = NULL, posthoc = TRUE, to_pcomp = NULL,
   center = TRUE, scale = TRUE, manova = FALSE, test = "Pillai", assumptions = TRUE,
-  univariate = FALSE, kw = FALSE
+  univariate = FALSE, kw = FALSE, add_signif = TRUE
 ) {
 
   library(nlme)

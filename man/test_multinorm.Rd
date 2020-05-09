@@ -4,7 +4,14 @@
 \alias{test_multinorm}
 \title{Test multivariate normality}
 \usage{
-test_multinorm(d, variables, grouping, nesting = NULL, univariate = FALSE)
+test_multinorm(
+  d,
+  variables,
+  grouping,
+  nesting = NULL,
+  univariate = FALSE,
+  add_signif = TRUE
+)
 }
 \arguments{
 \item{d}{A data frame}

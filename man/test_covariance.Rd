@@ -4,7 +4,7 @@
 \alias{test_covariance}
 \title{Test homogeneity of covariance matrices}
 \usage{
-test_covariance(d, variables, grouping, nesting = NULL)
+test_covariance(d, variables, grouping, nesting = NULL, add_signif = TRUE)
 }
 \arguments{
 \item{d}{A data frame}

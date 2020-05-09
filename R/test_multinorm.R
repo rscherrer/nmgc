@@ -13,7 +13,7 @@
 #'
 #' @export
 
-test_multinorm <- function(d, variables, grouping, nesting = NULL, univariate = FALSE) {
+test_multinorm <- function(d, variables, grouping, nesting = NULL, univariate = FALSE, add_signif = TRUE) {
 
   library(MVN)
   library(tidyverse)

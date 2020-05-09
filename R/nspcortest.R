@@ -20,7 +20,7 @@
 nspcortest <- function(
   data, variables, nesting = NULL, nperm = 1000, seed = NULL, lon = "longitude",
   lat = "latitude", verbose = TRUE, pb = TRUE, to_pcomp = NULL, center = TRUE,
-  scale = TRUE, keep = NULL
+  scale = TRUE, keep = NULL, add_signif = TRUE
 ) {
 
   # Spatial autocorrelation by permutation test

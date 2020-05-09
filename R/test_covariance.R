@@ -12,7 +12,7 @@
 #'
 #' @export
 
-test_covariance <- function(d, variables, grouping, nesting = NULL) {
+test_covariance <- function(d, variables, grouping, nesting = NULL, add_signif = TRUE) {
 
   library(heplots)
   library(tidyverse)

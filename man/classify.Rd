@@ -22,7 +22,8 @@ classify(
   test = TRUE,
   to_pcomp = NULL,
   center = TRUE,
-  scale = TRUE
+  scale = TRUE,
+  add_signif = TRUE
 )
 }
 \arguments{
