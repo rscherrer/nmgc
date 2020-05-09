@@ -15,6 +15,9 @@
 #' @param univariate Whether to test for multiple univariate normality instead of multivariate normality. See `?test_multinorm`
 #' @param kw Whether to perform Kruskal-Wallis tests instead of ANOVAs
 #' @param add_signif Whether to add significance asterisk labels in an extra column
+#' @param semiparametric Whether to perform a semi-parametric MANOVA (applicable only if `manova` is TRUE)
+#' @param seed Optional seed for the semi-parametric MANOVA
+#' @param iter Number of iterations for the parametric bootstrapping of the semi-parametric MANOVA (defaults to the recommended number 1,000)
 #'
 #' @details The analysis of variance is performed using a likelihood ratio test between a model including the factor of interest and a null model with intercept only. The LRT is done with models fitted with maximum likelihood. Model comparison between OLS and GLS is done with models fitted with restricted maximum likelihood, that include the factor to be tested (as per Zuur et al. 2009).
 #'
@@ -33,7 +36,7 @@
 ##'  \item{posthoc_p...}{ Extra columns with the P-values for each contrast in the multiple post-hoc comparisons}
 ##' }
 #'
-#' Otherwise, a data frame with MANOVA results for each subset, including:
+#' Otherwise, a data frame with MANOVA results for each subset, including, if `semiparametric` is FALSE,
 #'
 #' \itemize{
 #' \item{df}{ The degrees of freedom of the MANOVA}
@@ -42,6 +45,14 @@
 #' \item{denom_df}{ Denominator degrees of freedom of the F-test}
 #' \item{pseudoF}{ Approximate F-statistic}
 #' \item{pvalue}{ P-value of the F-test}
+#' }
+#'
+#' otherwise, the results of a semi-parametric MANOVA, with:
+#'
+#' \itemize{
+#' \item{term}{ The term being tested, probably the grouping variable}
+#' \item{MATS}{ The modified ANOVA-type statistic value}
+#' \item{pvalue}{ P-value computed from the parametric bootstrap resampling}
 #' }
 #'
 #' If `assumptions` is TRUE, the resulting data frame is combined in a list with a list of three elements:
@@ -56,12 +67,16 @@
 nanova <- function(
   data, variables, grouping, nesting = NULL, posthoc = TRUE, to_pcomp = NULL,
   center = TRUE, scale = TRUE, manova = FALSE, test = "Pillai", assumptions = TRUE,
-  univariate = FALSE, kw = FALSE, add_signif = TRUE
+  univariate = FALSE, kw = FALSE, add_signif = TRUE, semiparametric = FALSE,
+  seed = NULL, iter = 1000
 ) {
 
   library(nlme)
   library(MuMIn)
+  library(MANOVA.RM)
   library(tidyverse)
+
+  if (is.null(seed)) seed <- sample(1000, 1)
 
   if (!is.null(to_pcomp)) data <- data %>%
       cbind(npcomp(
@@ -123,9 +138,24 @@ nanova <- function(
     if (manova) {
 
       X <- data[, variables] %>% as.matrix
-      fit <- summary(manova(X ~ group, data), test = test)
-      fit <- fit$stats %>% data.frame %>% .[1, ]
-      colnames(fit) <- c("df", test, "pseudoF", "num_df", "den_df", "pvalue")
+
+      if (semiparametric) {
+
+        fit <- summary(manova(X ~ group, data), test = test)
+        fit <- fit$stats %>% data.frame %>% .[1, ]
+        colnames(fit) <- c("df", test, "pseudoF", "num_df", "den_df", "pvalue")
+
+      } else {
+
+        fit <- MANOVA.wide(X ~ group, data, seed = seed, iter = iter)
+        fit <- fit$MATS %>%
+          data.frame %>%
+          rownames_to_column("term") %>%
+          rename(MATS = "Test.statistic") %>%
+          mutate(pvalue = fit$resampling %>% data.frame %>% .[["paramBS..MATS."]])
+
+      }
+
       return (fit)
 
     }
