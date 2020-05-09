@@ -694,3 +694,16 @@ To github.com:rscherrer/nmgc
    3fc40e2..6c6f537  master -> master
 ]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ 
 ]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git push[Kgit add .
+]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git commit -m "tibbles on[K[Kdont like empty colnames"
+[master 50df008] tibbles dont like empty colnames
+ 4 files changed, 20 insertions(+), 10 deletions(-)
+]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git push
+Counting objects: 13, done.
+Delta compression using up to 8 threads.
+Compressing objects:   8% (1/12)   Compressing objects:  16% (2/12)   Compressing objects:  25% (3/12)   Compressing objects:  33% (4/12)   Compressing objects:  41% (5/12)   Compressing objects:  50% (6/12)   Compressing objects:  58% (7/12)   Compressing objects:  66% (8/12)   Compressing objects:  75% (9/12)   Compressing objects:  83% (10/12)   Compressing objects:  91% (11/12)   Compressing objects: 100% (12/12)   Compressing objects: 100% (12/12), done.
+Writing objects:   7% (1/13)   Writing objects:  15% (2/13)   Writing objects:  23% (3/13)   Writing objects:  30% (4/13)   Writing objects:  38% (5/13)   Writing objects:  46% (6/13)   Writing objects:  53% (7/13)   Writing objects:  61% (8/13)   Writing objects:  69% (9/13)   Writing objects:  76% (10/13)   Writing objects:  84% (11/13)   Writing objects:  92% (12/13)   Writing objects: 100% (13/13)   Writing objects: 100% (13/13), 1.62 KiB | 332.00 KiB/s, done.
+Total 13 (delta 10), reused 0 (delta 0)
+remote: Resolving deltas:   0% (0/10)[Kremote: Resolving deltas:  10% (1/10)[Kremote: Resolving deltas:  20% (2/10)[Kremote: Resolving deltas:  30% (3/10)[Kremote: Resolving deltas:  40% (4/10)[Kremote: Resolving deltas:  50% (5/10)[Kremote: Resolving deltas:  60% (6/10)[Kremote: Resolving deltas:  70% (7/10)[Kremote: Resolving deltas:  80% (8/10)[Kremote: Resolving deltas:  90% (9/10)[Kremote: Resolving deltas: 100% (10/10)[Kremote: Resolving deltas: 100% (10/10), completed with 10 local objects.[K
+To github.com:rscherrer/nmgc
+   6c6f537..50df008  master -> master
+]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git add .
