@@ -164,15 +164,13 @@ nanova <- function(
       models <- list(mod1, mod2)
       if (!is.null(random)) {
         mod3 <- lme(X ~ group, data = data, random = formula(paste("~ 1 |", random)))
-        mod4 <- lme(X ~ group, data = data, weights = varIdent(form = formula(paste("~ 1 |", grouping))), random = formula(paste("~ 1 |", random)))
-        models <- c(models, mod3, mod4)
+        mod4 <- lme(
+          X ~ group, data = data, weights = varIdent(form = formula(paste("~ 1 |", grouping))),
+          random = formula(paste("~ 1 |", random))
+        )
+        models[[3]] <- mod3
+        models[[4]] <- mod4
       }
-
-      # Fit a linear model with generalized least squares
-      mod_gls <- gls(X ~ group, data = data, weights = varIdent(form = formula(paste("~ 1 |", grouping))))
-
-      # Fit a linear model with ordinary least squares
-      mod_ols <- gls(X ~ group, data = data)
 
       # Compare the AICc of the models
       aiccs <- unlist(do.call("AICc", models))

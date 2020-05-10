@@ -4,4 +4,5 @@ library(nmgc)
 
 variables <- paste0("wl", c(300, 400, 700))
 
-nanova(data, variables, grouping = "habitat", univariate = TRUE, parametric = FALSE)
+nanova(data, variables, grouping = "habitat", nesting = "island",
+       univariate = TRUE, parametric = TRUE, random = "site")
