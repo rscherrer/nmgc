@@ -42,6 +42,8 @@ test_multinorm <- function(d, variables, grouping, nesting = NULL, univariate = 
 
     out <- out %>% rename(W = "statistic", pvalue = "p.value")
 
+    if (add_signif) out <- out %>% add_signif()
+
     return (out)
 
   }

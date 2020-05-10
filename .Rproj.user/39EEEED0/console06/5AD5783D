@@ -721,3 +721,16 @@ remote: Resolving deltas:   0% (0/7)[Kremote: Resolving deltas:  14% (1/7)[K
 To github.com:rscherrer/nmgc
    50df008..7e58559  master -> master
 ]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git add .
+]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git commit -m "n[Kne [K[K[Knanova now performed[K[Ks semi parametric manova"
+[master 3c6c13e] nanova now performs semi parametric manova
+ 3 files changed, 51 insertions(+), 7 deletions(-)
+]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git push
+Counting objects: 9, done.
+Delta compression using up to 8 threads.
+Compressing objects:  11% (1/9)   Compressing objects:  22% (2/9)   Compressing objects:  33% (3/9)   Compressing objects:  44% (4/9)   Compressing objects:  55% (5/9)   Compressing objects:  66% (6/9)   Compressing objects:  77% (7/9)   Compressing objects:  88% (8/9)   Compressing objects: 100% (9/9)   Compressing objects: 100% (9/9), done.
+Writing objects:  11% (1/9)   Writing objects:  22% (2/9)   Writing objects:  33% (3/9)   Writing objects:  44% (4/9)   Writing objects:  55% (5/9)   Writing objects:  66% (6/9)   Writing objects:  77% (7/9)   Writing objects:  88% (8/9)   Writing objects: 100% (9/9)   Writing objects: 100% (9/9), 1.50 KiB | 769.00 KiB/s, done.
+Total 9 (delta 6), reused 0 (delta 0)
+remote: Resolving deltas:   0% (0/6)[Kremote: Resolving deltas:  16% (1/6)[Kremote: Resolving deltas:  33% (2/6)[Kremote: Resolving deltas:  50% (3/6)[Kremote: Resolving deltas:  66% (4/6)[Kremote: Resolving deltas:  83% (5/6)[Kremote: Resolving deltas: 100% (6/6)[Kremote: Resolving deltas: 100% (6/6), completed with 6 local objects.[K
+To github.com:rscherrer/nmgc
+   7e58559..3c6c13e  master -> master
+[K]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git add .

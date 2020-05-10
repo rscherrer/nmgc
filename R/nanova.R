@@ -15,16 +15,17 @@
 #' @param univariate Whether to test for multiple univariate normality instead of multivariate normality. See `?test_multinorm`
 #' @param kw Whether to perform Kruskal-Wallis tests instead of ANOVAs
 #' @param add_signif Whether to add significance asterisk labels in an extra column
-#' @param semiparametric Whether to perform a semi-parametric MANOVA (applicable only if `manova` is TRUE)
+#' @param parametric Whether to perform a parametric MANOVA (applicable only if `manova` is TRUE)
 #' @param seed Optional seed for the semi-parametric MANOVA
 #' @param iter Number of iterations for the parametric bootstrapping of the semi-parametric MANOVA (defaults to the recommended number 1,000)
+#' @param random Optional random effect for fitting a mixed model
 #'
 #' @details The analysis of variance is performed using a likelihood ratio test between a model including the factor of interest and a null model with intercept only. The LRT is done with models fitted with maximum likelihood. Model comparison between OLS and GLS is done with models fitted with restricted maximum likelihood, that include the factor to be tested (as per Zuur et al. 2009).
 #'
 #' @return If `manova` is FALSE, data frame containing the results of the ANOVAs for each variable and each subset of the data, including:
 #'
 #' \itemize{
-##'  \item{best_fit}{ The best-fitting model (OLS or GLS)}
+##'  \item{best}{ The best-fitting model (OLS or GLS)}
 ##'  \item{df_model}{ Model degrees of freedom}
 ##'  \item{AICc}{ AICc of the model}
 ##'  \item{dAICc}{ Difference in AICc between the GLS-model and the OLS-model}
@@ -67,8 +68,8 @@
 nanova <- function(
   data, variables, grouping, nesting = NULL, posthoc = TRUE, to_pcomp = NULL,
   center = TRUE, scale = TRUE, manova = FALSE, test = "Pillai", assumptions = TRUE,
-  univariate = FALSE, kw = FALSE, add_signif = TRUE, semiparametric = FALSE,
-  seed = NULL, iter = 1000
+  univariate = FALSE, kw = FALSE, add_signif = TRUE, parametric = TRUE,
+  seed = NULL, iter = 1000, random = NULL
 ) {
 
   library(nlme)
@@ -139,7 +140,7 @@ nanova <- function(
 
       X <- data[, variables] %>% as.matrix
 
-      if (semiparametric) {
+      if (parametric) {
 
         fit <- summary(manova(X ~ group, data), test = test)
         fit <- fit$stats %>% data.frame %>% .[1, ]
@@ -170,31 +171,42 @@ nanova <- function(
 
       data$X <- data[, variable]
 
+      # Fit candidate models with different variance structures
+      mod1 <- gls(X ~ group, data = data)
+      mod2 <- gls(X ~ group, data = data, weights = varIdent(form = formula(paste("~ 1 |", grouping))))
+      if (!is.null(random)) {
+        mod3 <- lme(X ~ group, data = data, random = formula(paste("~ 1 |", random)))
+        mod4 <- lme(X ~ group, data = data, weights = varIdent(form = formula(paste("~ 1 |", grouping))), random = formula(paste("~ 1 |", random)))
+      } else mod3 <- mod4 <- NULL
+      models <- list(mod1, mod2, mod3, mod4)
+
       # Fit a linear model with generalized least squares
       mod_gls <- gls(X ~ group, data = data, weights = varIdent(form = formula(paste("~ 1 |", grouping))))
 
       # Fit a linear model with ordinary least squares
       mod_ols <- gls(X ~ group, data = data)
 
-      # Compare the AICc of both
-      aiccs <- unlist(AICc(mod_gls, mod_ols))
-      delta_aicc <- aiccs[["AICc1"]] - aiccs[["AICc2"]]
+      # Compare the AICc of the models
+      aiccs <- unlist(do.call("AICc", models))
+      dfs <- unname(aiccs[grep("df", names(aiccs))])
+      aiccs <- unname(aiccs[grep("AICc", names(aiccs))])
+      best <- which(aiccs == min(aiccs))
+      best_mod <- models[[best]]
+      best_df <- dfs[best]
+      best_aicc <- aiccs[best]
+      deltas <- aiccs - aiccs[1]
+      best_delta <- deltas[best]
+      weights <- exp(-0.5 * deltas)
+      weights <- weights / sum(weights)
+      best_weight <- weights[best]
 
-      # Retain the best model
-      best_mod <- mod_ols
-      if (delta_aicc < 0) best_mod <- mod_gls
-
-      # AICc, df and type of fit of the best model
-      best_aicc <- ifelse(delta_aicc < 0, aiccs[["AICc1"]], aiccs[["AICc2"]])
-      best_df <- ifelse(delta_aicc < 0, aiccs[["df1"]], aiccs[["df2"]])
-      best_fit <- ifelse(delta_aicc < 0, 2, 1)
+      # AIC weights from Burnham, K. P., and D. R. Anderson. 2002. Model selection and multimodel inference : a practical information-theoretic approach. Springer, New York.
 
       # Refit the model with maximum likelihood (instead of REML)
       best_mod <- update(best_mod, method = "ML")
 
       # Perform the analysis of variance using likelihood ratio test
-      best_mod0 <- update(best_mod, X ~ 1)
-
+      best_mod0 <- update(best_mod, X ~ 1) # null model
       anova_table <- anova(best_mod, best_mod0) %>% unlist()
 
       # Assemble the output we want to display
@@ -205,10 +217,11 @@ nanova <- function(
 
       # Prepare output
       out <- c(
-        best_fit = best_fit,
+        best_fit = best,
         df_model = best_df,
         AICc = best_aicc,
-        dAICc = delta_aicc,
+        dAICc = best_delta,
+        AICcw = best_weight,
         df_LRT = dflrt,
         loglik = loglik,
         lratio = lratio,
@@ -220,7 +233,7 @@ nanova <- function(
       if (posthoc) {
 
         # If GLS is the best fit...
-        if (best_fit == 2) {
+        if (best == 2) {
 
           # Perform multiple comparisons using Wilcoxon tests
           posthoc_test <- 2
@@ -260,12 +273,16 @@ nanova <- function(
   if (!manova) {
 
     # Package the output nicely
-    anovadata <- data.frame(rep(names(data), each = length(variables)), variable = rep(variables, length(data)), anovadata)
+    anovadata <- data.frame(
+      rep(names(data), each = length(variables)),
+      variable = rep(variables, length(data)),
+      anovadata
+    )
     colnames(anovadata)[1] <- nesting
-    anovadata <- anovadata %>% mutate(best_fit = factor(best_fit))
+    #anovadata <- anovadata %>% mutate(best_fit = factor(best_fit))
     if (posthoc) anovadata <- anovadata %>% mutate(posthoc_test = factor(posthoc_test))
 
-    levels(anovadata$best_fit) <- c("OLS", "GLS")
+    levels(anovadata$best) <- c("OLS", "GLS")
     if (posthoc) levels(anovadata$posthoc_test) <- c("Tukey", "Wilcoxon")
 
   }
