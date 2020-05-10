@@ -111,8 +111,6 @@ nanova <- function(
 
     if (add_signif) out <- out %>% add_signif()
 
-    if (assumptions) out <- list(kw = out, assum = assum)
-
     return (out)
 
   }
@@ -134,7 +132,10 @@ nanova <- function(
 
       } else {
 
-        fit <- MANOVA.wide(X ~ group, data, seed = seed, iter = iter)
+        fit <- MANOVA.wide(
+          data %>% .[variables] %>% do.call("cbind", .) ~ group,
+          data = data, seed = seed, iter = iter
+        )
         fit <- fit$MATS %>%
           data.frame %>%
           rownames_to_column("term") %>%
@@ -160,11 +161,12 @@ nanova <- function(
       # Fit candidate models with different variance structures
       mod1 <- gls(X ~ group, data = data)
       mod2 <- gls(X ~ group, data = data, weights = varIdent(form = formula(paste("~ 1 |", grouping))))
+      models <- list(mod1, mod2)
       if (!is.null(random)) {
         mod3 <- lme(X ~ group, data = data, random = formula(paste("~ 1 |", random)))
         mod4 <- lme(X ~ group, data = data, weights = varIdent(form = formula(paste("~ 1 |", grouping))), random = formula(paste("~ 1 |", random)))
-      } else mod3 <- mod4 <- NULL
-      models <- list(mod1, mod2, mod3, mod4)
+        models <- c(models, mod3, mod4)
+      }
 
       # Fit a linear model with generalized least squares
       mod_gls <- gls(X ~ group, data = data, weights = varIdent(form = formula(paste("~ 1 |", grouping))))
