@@ -9,15 +9,12 @@ nanova(
   variables,
   grouping,
   nesting = NULL,
+  univariate = TRUE,
   posthoc = TRUE,
   to_pcomp = NULL,
   center = TRUE,
   scale = TRUE,
-  manova = FALSE,
   test = "Pillai",
-  assumptions = TRUE,
-  univariate = FALSE,
-  kw = FALSE,
   add_signif = TRUE,
   parametric = TRUE,
   seed = NULL,
@@ -34,31 +31,25 @@ nanova(
 
 \item{nesting}{The name of the nesting factor}
 
-\item{posthoc}{Whether to perform post-hoc tests (if the GLS-model is the best fit, nonparametetric Wilcoxonn tests are used for post-hoc comparisons, otherwise Tukey's HSD test is used)}
+\item{univariate}{Whether to perform ANOVA (TRUE) or MANOVA (FALSE)}
+
+\item{posthoc}{Whether to perform post-hoc tests}
 
 \item{to_pcomp}{Optional variables to perform PCA on}
 
 \item{center, scale}{Parameters for \code{npcomp}}
 
-\item{manova}{Whether to perform a MANOVA instead of multiple ANOVAs within each subset}
-
 \item{test}{Test to use for the MANOVA (defaults to Pillai's trace). See \code{?summary.manova}}
-
-\item{assumptions}{Whether to perform tests of assumptions for the MANOVA}
-
-\item{univariate}{Whether to test for multiple univariate normality instead of multivariate normality. See \code{?test_multinorm}}
-
-\item{kw}{Whether to perform Kruskal-Wallis tests instead of ANOVAs}
 
 \item{add_signif}{Whether to add significance asterisk labels in an extra column}
 
-\item{parametric}{Whether to perform a parametric MANOVA (applicable only if \code{manova} is TRUE)}
+\item{parametric}{Whether to perform parametric tests (linear models instead of Kruskal-Wallis if \code{univariate} is TRUE, parametric instead of semi-parametric MANOVA if \code{univariate} is FALSE)}
 
 \item{seed}{Optional seed for the semi-parametric MANOVA}
 
 \item{iter}{Number of iterations for the parametric bootstrapping of the semi-parametric MANOVA (defaults to the recommended number 1,000)}
 
-\item{random}{Optional random effect for fitting a mixed model}
+\item{random}{Optional random effect for fitting a mixed model in univariate ANOVA}
 }
 \value{
 If \code{manova} is FALSE, data frame containing the results of the ANOVAs for each variable and each subset of the data, including:
@@ -93,13 +84,6 @@ otherwise, the results of a semi-parametric MANOVA, with:
 \item{term}{ The term being tested, probably the grouping variable}
 \item{MATS}{ The modified ANOVA-type statistic value}
 \item{pvalue}{ P-value computed from the parametric bootstrap resampling}
-}
-
-If \code{assumptions} is TRUE, the resulting data frame is combined in a list with a list of three elements:
-\itemize{
-\item{multinorm}{ A data frame testing multivariate normality within each group and each subset. See \code{?test_multinorm}}
-\item{cov}{ A data frame testing the homogeneity of covariance matrices between groups within each subset. See \code{?test_covaraince}}
-\item{outliers}{ A nested list of outlier observations within each group and each subset. See \code{?test_outliers}}
 }
 }
 \description{

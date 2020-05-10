@@ -6,19 +6,16 @@
 #' @param variables The variables to analyze
 #' @param nesting The name of the nesting factor
 #' @param grouping The name of the grouping factor
-#' @param posthoc Whether to perform post-hoc tests (if the GLS-model is the best fit, nonparametetric Wilcoxonn tests are used for post-hoc comparisons, otherwise Tukey's HSD test is used)
+#' @param posthoc Whether to perform post-hoc tests
 #' @param to_pcomp Optional variables to perform PCA on
 #' @param center,scale Parameters for `npcomp`
-#' @param manova Whether to perform a MANOVA instead of multiple ANOVAs within each subset
 #' @param test Test to use for the MANOVA (defaults to Pillai's trace). See `?summary.manova`
-#' @param assumptions Whether to perform tests of assumptions for the MANOVA
-#' @param univariate Whether to test for multiple univariate normality instead of multivariate normality. See `?test_multinorm`
-#' @param kw Whether to perform Kruskal-Wallis tests instead of ANOVAs
+#' @param univariate Whether to perform ANOVA (TRUE) or MANOVA (FALSE)
 #' @param add_signif Whether to add significance asterisk labels in an extra column
-#' @param parametric Whether to perform a parametric MANOVA (applicable only if `manova` is TRUE)
+#' @param parametric Whether to perform parametric tests (linear models instead of Kruskal-Wallis if `univariate` is TRUE, parametric instead of semi-parametric MANOVA if `univariate` is FALSE)
 #' @param seed Optional seed for the semi-parametric MANOVA
 #' @param iter Number of iterations for the parametric bootstrapping of the semi-parametric MANOVA (defaults to the recommended number 1,000)
-#' @param random Optional random effect for fitting a mixed model
+#' @param random Optional random effect for fitting a mixed model in univariate ANOVA
 #'
 #' @details The analysis of variance is performed using a likelihood ratio test between a model including the factor of interest and a null model with intercept only. The LRT is done with models fitted with maximum likelihood. Model comparison between OLS and GLS is done with models fitted with restricted maximum likelihood, that include the factor to be tested (as per Zuur et al. 2009).
 #'
@@ -56,20 +53,24 @@
 #' \item{pvalue}{ P-value computed from the parametric bootstrap resampling}
 #' }
 #'
-#' If `assumptions` is TRUE, the resulting data frame is combined in a list with a list of three elements:
-#' \itemize{
-#' \item{multinorm}{ A data frame testing multivariate normality within each group and each subset. See `?test_multinorm`}
-#' \item{cov}{ A data frame testing the homogeneity of covariance matrices between groups within each subset. See `?test_covaraince`}
-#' \item{outliers}{ A nested list of outlier observations within each group and each subset. See `?test_outliers`}
-#' }
-#'
 #' @export
 
 nanova <- function(
-  data, variables, grouping, nesting = NULL, posthoc = TRUE, to_pcomp = NULL,
-  center = TRUE, scale = TRUE, manova = FALSE, test = "Pillai", assumptions = TRUE,
-  univariate = FALSE, kw = FALSE, add_signif = TRUE, parametric = TRUE,
-  seed = NULL, iter = 1000, random = NULL
+  data,
+  variables,
+  grouping,
+  nesting = NULL,
+  univariate = TRUE,
+  posthoc = TRUE,
+  to_pcomp = NULL,
+  center = TRUE,
+  scale = TRUE,
+  test = "Pillai",
+  add_signif = TRUE,
+  parametric = TRUE,
+  seed = NULL,
+  iter = 1000,
+  random = NULL
 ) {
 
   library(nlme)
@@ -90,26 +91,11 @@ nanova <- function(
     nesting <- "nesting"
   }
 
-  if (assumptions) {
-
-    assum <- list(
-      multinorm = test_multinorm(data, variables, grouping, nesting, univariate),
-      cov = test_covariance(data, variables, grouping, nesting),
-      outliers = test_outliers(data, variables, grouping, nesting)
-    )
-
-    if (add_signif) {
-      assum$multinorm <- assum$multinorm %>% add_signif()
-      assum$cov <- assum$cov %>% add_signif()
-    }
-
-  }
-
   # For each island...
   data <- split(data, data[, nesting])
 
   # If Kruskal-Wallis...
-  if (kw) {
+  if (univariate & !parametric) {
 
     out <- data %>% map_dfr(function(df) {
       names(variables) <- variables
@@ -136,7 +122,7 @@ nanova <- function(
     data$group <- data[, grouping]
 
     # If MANOVA...
-    if (manova) {
+    if (!univariate) {
 
       X <- data[, variables] %>% as.matrix
 
@@ -270,7 +256,7 @@ nanova <- function(
     }))
   })))
 
-  if (!manova) {
+  if (univariate) {
 
     # Package the output nicely
     anovadata <- data.frame(
@@ -288,8 +274,6 @@ nanova <- function(
   }
 
   if (add_signif) anovadata <- anovadata %>% add_signif()
-
-  if (assumptions) anovadata <- list(anova = anovadata, assum = assum)
 
   return (anovadata)
 
