@@ -4,7 +4,14 @@
 \alias{test_covariance}
 \title{Test homogeneity of covariance matrices}
 \usage{
-test_covariance(d, variables, grouping, nesting = NULL, add_signif = TRUE)
+test_covariance(
+  d,
+  variables,
+  grouping,
+  nesting = NULL,
+  add_signif = TRUE,
+  univariate = FALSE
+)
 }
 \arguments{
 \item{d}{A data frame}
@@ -16,6 +23,8 @@ test_covariance(d, variables, grouping, nesting = NULL, add_signif = TRUE)
 \item{nesting}{Nesting variable}
 
 \item{add_signif}{Whether to add significance asterisk labels in an extra column}
+
+\item{univariate}{Whether to perform univariate Bartlett's tests instead}
 }
 \value{
 A data frame with the chi-square statistics, degrees of freedom and P-value of Box's M-test performed between groups within each subset

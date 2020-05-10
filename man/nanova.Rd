@@ -18,7 +18,11 @@ nanova(
   assumptions = TRUE,
   univariate = FALSE,
   kw = FALSE,
-  add_signif = TRUE
+  add_signif = TRUE,
+  parametric = TRUE,
+  seed = NULL,
+  iter = 1000,
+  random = NULL
 )
 }
 \arguments{
@@ -47,12 +51,20 @@ nanova(
 \item{kw}{Whether to perform Kruskal-Wallis tests instead of ANOVAs}
 
 \item{add_signif}{Whether to add significance asterisk labels in an extra column}
+
+\item{parametric}{Whether to perform a parametric MANOVA (applicable only if \code{manova} is TRUE)}
+
+\item{seed}{Optional seed for the semi-parametric MANOVA}
+
+\item{iter}{Number of iterations for the parametric bootstrapping of the semi-parametric MANOVA (defaults to the recommended number 1,000)}
+
+\item{random}{Optional random effect for fitting a mixed model}
 }
 \value{
 If \code{manova} is FALSE, data frame containing the results of the ANOVAs for each variable and each subset of the data, including:
 
 \itemize{
-\item{best_fit}{ The best-fitting model (OLS or GLS)}
+\item{best}{ The best-fitting model (OLS or GLS)}
 \item{df_model}{ Model degrees of freedom}
 \item{AICc}{ AICc of the model}
 \item{dAICc}{ Difference in AICc between the GLS-model and the OLS-model}
@@ -64,7 +76,7 @@ If \code{manova} is FALSE, data frame containing the results of the ANOVAs for e
 \item{posthoc_p...}{ Extra columns with the P-values for each contrast in the multiple post-hoc comparisons}
 }
 
-Otherwise, a data frame with MANOVA results for each subset, including:
+Otherwise, a data frame with MANOVA results for each subset, including, if \code{semiparametric} is FALSE,
 
 \itemize{
 \item{df}{ The degrees of freedom of the MANOVA}
@@ -73,6 +85,14 @@ Otherwise, a data frame with MANOVA results for each subset, including:
 \item{denom_df}{ Denominator degrees of freedom of the F-test}
 \item{pseudoF}{ Approximate F-statistic}
 \item{pvalue}{ P-value of the F-test}
+}
+
+otherwise, the results of a semi-parametric MANOVA, with:
+
+\itemize{
+\item{term}{ The term being tested, probably the grouping variable}
+\item{MATS}{ The modified ANOVA-type statistic value}
+\item{pvalue}{ P-value computed from the parametric bootstrap resampling}
 }
 
 If \code{assumptions} is TRUE, the resulting data frame is combined in a list with a list of three elements:
