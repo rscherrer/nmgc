@@ -109,9 +109,9 @@ nanova <- function(
     }
   } else {
     if (parametric) {
-      this_test <- nanova_manova
+      this_test <- function(x, y) nanova_manova(x, y, test = test)
     } else {
-      this_test <- nanova_smanova
+      this_test <- function(x, y) nanova_smanova(x, y, seed = seed, iter = iter)
     }
   }
 

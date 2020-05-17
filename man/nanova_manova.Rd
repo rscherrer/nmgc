@@ -4,7 +4,7 @@
 \alias{nanova_manova}
 \title{MANOVA}
 \usage{
-nanova_manova(data, variables)
+nanova_manova(data, variables, test = "Pillai")
 }
 \description{
 MANOVA

@@ -1,6 +1,6 @@
 #' MANOVA
 
-nanova_manova <- function(data, variables) {
+nanova_manova <- function(data, variables, test = "Pillai") {
 
   X <- data[, variables] %>% as.matrix
 
