@@ -19,7 +19,8 @@ nanova(
   parametric = TRUE,
   seed = NULL,
   iter = 1000,
-  random = NULL
+  random = NULL,
+  pthreshold = 0.05
 )
 }
 \arguments{
@@ -50,9 +51,11 @@ nanova(
 \item{iter}{Number of iterations for the parametric bootstrapping of the semi-parametric MANOVA (defaults to the recommended number 1,000)}
 
 \item{random}{Optional random effect for fitting a mixed model in univariate ANOVA}
+
+\item{pthreshold}{Threshold P-value to keep posthoc tests (set to 1 to keep all tests)}
 }
 \value{
-If \code{manova} is FALSE, data frame containing the results of the ANOVAs for each variable and each subset of the data, including:
+A list with two objecst: \code{res}, containing the results of the variable-wise ANOVA tests, and \code{ph}, containing the results of the contrast-wise posthoc tests. \code{res} can be of multiple formats. If \code{manova} is FALSE, data frame containing the results of the ANOVAs for each variable and each subset of the data, including:
 
 \itemize{
 \item{best}{ The best-fitting model (OLS or GLS)}
@@ -91,4 +94,7 @@ Performs (M)ANOVAs for multiple variables across different subsets of the data. 
 }
 \details{
 The analysis of variance is performed using a likelihood ratio test between a model including the factor of interest and a null model with intercept only. The LRT is done with models fitted with maximum likelihood. Model comparison between OLS and GLS is done with models fitted with restricted maximum likelihood, that include the factor to be tested (as per Zuur et al. 2009).
+}
+\note{
+Note that \code{posthoc} will be set to FALSE automatically if \code{univariate} is FALSE. We do not do multivariate contrasts.
 }

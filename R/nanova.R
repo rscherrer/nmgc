@@ -16,10 +16,13 @@
 #' @param seed Optional seed for the semi-parametric MANOVA
 #' @param iter Number of iterations for the parametric bootstrapping of the semi-parametric MANOVA (defaults to the recommended number 1,000)
 #' @param random Optional random effect for fitting a mixed model in univariate ANOVA
+#' @param pthreshold Threshold P-value to keep posthoc tests (set to 1 to keep all tests)
 #'
 #' @details The analysis of variance is performed using a likelihood ratio test between a model including the factor of interest and a null model with intercept only. The LRT is done with models fitted with maximum likelihood. Model comparison between OLS and GLS is done with models fitted with restricted maximum likelihood, that include the factor to be tested (as per Zuur et al. 2009).
 #'
-#' @return If `manova` is FALSE, data frame containing the results of the ANOVAs for each variable and each subset of the data, including:
+#' @note Note that `posthoc` will be set to FALSE automatically if `univariate` is FALSE. We do not do multivariate contrasts.
+#'
+#' @return A list with two objecst: `res`, containing the results of the variable-wise ANOVA tests, and `ph`, containing the results of the contrast-wise posthoc tests. `res` can be of multiple formats. If `manova` is FALSE, data frame containing the results of the ANOVAs for each variable and each subset of the data, including:
 #'
 #' \itemize{
 ##'  \item{best}{ The best-fitting model (OLS or GLS)}
@@ -70,211 +73,88 @@ nanova <- function(
   parametric = TRUE,
   seed = NULL,
   iter = 1000,
-  random = NULL
+  random = NULL,
+  pthreshold = 0.05
 ) {
 
-  library(nlme)
-  library(MuMIn)
-  library(MANOVA.RM)
   library(tidyverse)
 
   if (is.null(seed)) seed <- sample(1000, 1)
 
+  # Compute principal components if needed
   if (!is.null(to_pcomp)) data <- data %>%
       cbind(npcomp(
         data, to_pcomp, center, scale, nesting, combine = TRUE,
         reduce = variables
       )$x %>% data.frame %>% dplyr::select(-nesting))
 
+  # Nested or unnested design
   if (is.null(nesting)) {
     data$nesting <- factor(1)
     nesting <- "nesting"
-  }
+  } else data$nesting <- data[[nesting]]
 
-  # For each island...
-  data <- split(data, data[, nesting])
+  # Special column for grouping
+  data$group <- data[, grouping]
 
-  # If Kruskal-Wallis...
-  if (univariate & !parametric) {
+  # Variables must be named
+  names(variables) <- variables
 
-    out <- data %>% map_dfr(function(df) {
-      names(variables) <- variables
-      map_dfr(
-        variables,
-        ~ kruskal.test(df[[.x]], df[[grouping]]) %>%
-          .[c("statistic", "parameter", "p.value")] %>%
-          data.frame,
-        .id = "variable"
-      ) %>%
-        rename(chisq = "statistic", df = "parameter", pvalue = "p.value")
-    }, .id = nesting)
-
-    if (add_signif) out <- out %>% add_signif()
-
-    return (out)
-
-  }
-
-  anovadata <- data.frame(do.call("rbind", lapply(data, function(data) {
-
-    data$group <- data[, grouping]
-
-    # If MANOVA...
-    if (!univariate) {
-
-      X <- data[, variables] %>% as.matrix
-
-      if (parametric) {
-
-        fit <- summary(manova(X ~ group, data), test = test)
-        fit <- fit$stats %>% data.frame %>% .[1, ]
-        colnames(fit) <- c("df", test, "pseudoF", "num_df", "den_df", "pvalue")
-
-      } else {
-
-        fit <- MANOVA.wide(
-          data %>% .[variables] %>% do.call("cbind", .) ~ group,
-          data = data, seed = seed, iter = iter
-        )
-        fit <- fit$MATS %>%
-          data.frame %>%
-          rownames_to_column("term") %>%
-          rename(MATS = "Test.statistic") %>%
-          mutate(pvalue = fit$resampling %>% data.frame %>% .[["paramBS..MATS."]])
-
-      }
-
-      return (fit)
-
-    }
-
-    # Otherwise, for each variable...
-    t(sapply(variables, function(variable) {
-
-      # Note: when using model fitting functions inside another function, avoid
-      # passing them formulas as objects programatically, that will cause the anova.lme
-      # call to crash. Instead create extra columns in the data frame with specific names
-      # and explicitly pass those columns into the model fitting function
-
-      data$X <- data[, variable]
-
-      # Fit candidate models with different variance structures
-      mod1 <- gls(X ~ group, data = data)
-      mod2 <- gls(X ~ group, data = data, weights = varIdent(form = formula(paste("~ 1 |", grouping))))
-      models <- list(mod1, mod2)
-      if (!is.null(random)) {
-        mod3 <- lme(X ~ group, data = data, random = formula(paste("~ 1 |", random)))
-        mod4 <- lme(
-          X ~ group, data = data, weights = varIdent(form = formula(paste("~ 1 |", grouping))),
-          random = formula(paste("~ 1 |", random))
-        )
-        models[[3]] <- mod3
-        models[[4]] <- mod4
-      }
-
-      # Compare the AICc of the models
-      aiccs <- unlist(do.call("AICc", models))
-      dfs <- unname(aiccs[grep("df", names(aiccs))])
-      aiccs <- unname(aiccs[grep("AICc", names(aiccs))])
-      best <- which(aiccs == min(aiccs))
-      best_mod <- models[[best]]
-      best_df <- dfs[best]
-      best_aicc <- aiccs[best]
-      deltas <- aiccs - aiccs[1]
-      best_delta <- deltas[best]
-      weights <- exp(-0.5 * deltas)
-      weights <- weights / sum(weights)
-      best_weight <- weights[best]
-
-      # AIC weights from Burnham, K. P., and D. R. Anderson. 2002. Model selection and multimodel inference : a practical information-theoretic approach. Springer, New York.
-
-      # Refit the model with maximum likelihood (instead of REML)
-      best_mod <- update(best_mod, method = "ML")
-
-      # Perform the analysis of variance using likelihood ratio test
-      best_mod0 <- update(best_mod, X ~ 1) # null model
-      anova_table <- anova(best_mod, best_mod0) %>% unlist()
-
-      # Assemble the output we want to display
-      dflrt <- anova_table[["df1"]] - anova_table[["df2"]]
-      loglik <- anova_table[["logLik1"]]
-      lratio <- anova_table[["L.Ratio2"]]
-      pvalue <- anova_table[["p-value2"]]
-
-      # Prepare output
-      out <- c(
-        best_fit = best,
-        df_model = best_df,
-        AICc = best_aicc,
-        dAICc = best_delta,
-        AICcw = best_weight,
-        df_LRT = dflrt,
-        loglik = loglik,
-        lratio = lratio,
-        pvalue = pvalue
-      )
-
-      # Multiple comparisons
-
-      if (posthoc) {
-
-        # If GLS is the best fit...
-        if (best == 2) {
-
-          # Perform multiple comparisons using Wilcoxon tests
-          posthoc_test <- 2
-
-          group_names <- levels(data[, grouping])
-
-          # For each comparison of habitats...
-          posthoc_p <- sapply(seq_len(length(group_names) - 1), function(i) {
-            sapply(seq(i + 1, length(group_names)), function(j) {
-
-              # Perform a Wilcoxon test
-              pval <- wilcox.test(data[data[grouping] == group_names[j], variable], data[data[grouping] == group_names[i], variable])$p.value
-              names(pval) <- paste0(group_names[j], "-", group_names[i])
-              return (pval)
-
-            })
-          }) %>% unlist()
-
-        } else {
-
-          # Otherwise perform standard posthoc Tukey's HSD test
-          posthoc_test <- 1
-          posthoc_p <- TukeyHSD(aov(X ~ group, data))$group
-          posthoc_p <- posthoc_p[, "p adj"]
-
-        }
-
-        out <- c(out, posthoc_test = posthoc_test, posthoc_p = posthoc_p)
-
-      }
-
-      return (out)
-
-    }))
-  })))
-
+  # Choose the function to run
   if (univariate) {
+    if (parametric) {
+      this_test <- nanova_anova
+    } else {
+      this_test <- nanova_kruskal
+    }
+  } else {
+    if (parametric) {
+      this_test <- nanova_manova
+    } else {
+      this_test <- nanova_smanova
+    }
+  }
 
-    # Package the output nicely
-    anovadata <- data.frame(
-      rep(names(data), each = length(variables)),
-      variable = rep(variables, length(data)),
-      anovadata
-    )
-    colnames(anovadata)[1] <- nesting
-    #anovadata <- anovadata %>% mutate(best_fit = factor(best_fit))
-    if (posthoc) anovadata <- anovadata %>% mutate(posthoc_test = factor(posthoc_test))
+  # Perform analysis on each subset
+  res <- data %>%
+    group_by(nesting) %>%
+    nest() %>%
+    mutate(test = map(data, this_test, variables)) %>%
+    dplyr::select(-data) %>%
+    unnest(cols = c(test))
 
-    levels(anovadata$best) <- c("OLS", "GLS")
-    if (posthoc) levels(anovadata$posthoc_test) <- c("Tukey", "Wilcoxon")
+  # Add significance labels
+  if (add_signif) res <- res %>% add_signif()
+
+  if (!univariate) posthoc <- FALSE # we don't do multivariate posthoc tests around here
+  ph <- NULL
+  if (posthoc) {
+
+    # Choose what post-hoc test to perform
+    phtest <- res
+    if (parametric) {
+      phtest <- phtest %>% mutate(test = ifelse(best_fit %% 2 == 0, "dunnett", "tukey"))
+    } else {
+      phtest <- phtest %>% mutate(test = "nemenyi")
+    }
+    phtest <- phtest %>% select(nesting, variable, pvalue, test)
+
+    # Perform posthoc tests
+    ph <- data %>%
+      gather_("variable", "score", variables) %>%
+      group_by(nesting, variable) %>%
+      nest() %>%
+      right_join(phtest) %>%
+      mutate(posthoc = map2(data, test, nanova_posthoc)) %>%
+      filter(pvalue < pthreshold) %>%
+      select(-data, -pvalue) %>%
+      unnest(cols = c(posthoc))
+    if (add_signif) ph <- ph %>% add_signif()
 
   }
 
-  if (add_signif) anovadata <- anovadata %>% add_signif()
+  res <- list(res = res, ph = ph)
 
-  return (anovadata)
+  return (res)
 
 }
