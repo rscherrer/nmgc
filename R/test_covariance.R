@@ -24,6 +24,7 @@ test_covariance <- function(d, variables, grouping, nesting = NULL, add_signif =
   }
 
   d <- d[, c(nesting, grouping, variables)]
+
   d <- d %>% split(f = .[, nesting])
 
   # For each subset...
@@ -34,7 +35,7 @@ test_covariance <- function(d, variables, grouping, nesting = NULL, add_signif =
 
       # For each variable...
       out <- lapply(variables, function(variable) {
-        fit <- bartlett.test(data[, variable], data[, grouping])
+        fit <- bartlett.test(d[, variable], d[, grouping])
         return(c(
           K2 = unname(fit$statistic),
           df = unname(fit$parameter),

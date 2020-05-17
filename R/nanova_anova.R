@@ -1,6 +1,6 @@
 #' Multiple ANOVAs
 
-nanova_anova <- function(data, variables) {
+nanova_anova <- function(data, variables, random = NULL) {
 
   library(nlme)
   library(MuMIn)
@@ -22,7 +22,7 @@ nanova_anova <- function(data, variables) {
     # ANOVA with one variance per group
     mod2 <- gls(
       X ~ group, data = data,
-      weights = varIdent(form = formula(paste("~ 1 |", grouping)))
+      weights = varIdent(form = ~ 1 | group)
     )
     models <- list(mod1, mod2)
 
@@ -36,7 +36,7 @@ nanova_anova <- function(data, variables) {
       mod4 <- lme(
         X ~ group,
         data = data,
-        weights = varIdent(form = formula(paste("~ 1 |", grouping))),
+        weights = varIdent(form = ~ 1 | group),
         random = formula(paste("~ 1 |", random))
       )
       models[[3]] <- mod3

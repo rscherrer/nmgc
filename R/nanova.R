@@ -103,7 +103,7 @@ nanova <- function(
   # Choose the function to run
   if (univariate) {
     if (parametric) {
-      this_test <- nanova_anova
+      this_test <- function(x, y) nanova_anova(x, y, random = random)
     } else {
       this_test <- nanova_kruskal
     }
@@ -149,7 +149,7 @@ nanova <- function(
       filter(pvalue < pthreshold) %>%
       select(-data, -pvalue) %>%
       unnest(cols = c(posthoc))
-    if (add_signif) ph <- ph %>% add_signif()
+    if (nrow(ph) > 0 & add_signif) ph <- ph %>% add_signif()
 
   }
 

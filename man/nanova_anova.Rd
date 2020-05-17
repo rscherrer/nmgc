@@ -4,7 +4,7 @@
 \alias{nanova_anova}
 \title{Multiple ANOVAs}
 \usage{
-nanova_anova(data, variables)
+nanova_anova(data, variables, random = NULL)
 }
 \description{
 Multiple ANOVAs
