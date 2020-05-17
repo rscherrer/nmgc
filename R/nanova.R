@@ -79,8 +79,6 @@ nanova <- function(
 
   library(tidyverse)
 
-  if (is.null(seed)) seed <- sample(1000, 1)
-
   # Compute principal components if needed
   if (!is.null(to_pcomp)) data <- data %>%
       cbind(npcomp(
