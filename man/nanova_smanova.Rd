@@ -4,7 +4,7 @@
 \alias{nanova_smanova}
 \title{Semi-parametric MANOVA}
 \usage{
-nanova_smanova(data, variables)
+nanova_smanova(data, variables, seed = NULL, iter = 1000)
 }
 \description{
 Semi-parametric MANOVA

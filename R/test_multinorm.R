@@ -23,51 +23,37 @@ test_multinorm <- function(d, variables, grouping, nesting = NULL, univariate = 
     nesting <- "nesting"
   }
 
+  d$grouping <- d[[grouping]]
+
   if (univariate) {
 
-    out <- d %>%
-      split(f = .[c(nesting, grouping)]) %>%
-      map_dfr(
-        ~ .x %>% gather_("variable", "score", variables) %>%
-          split(f = .[["variable"]]) %>%
-          map_dfr(
-            ~ shapiro.test(.x$score) %>%
-              .[c("statistic", "p.value")] %>%
-              data.frame,
-            .id = "variable"
-          ),
-        .id = "nesting.grouping"
-      ) %>%
-      separate(nesting.grouping, into = c(nesting, grouping), sep = "\\.")
+    res <- d %>%
+      gather_("variable", "score", variables) %>%
+      group_by(nesting, grouping, variable) %>%
+      nest() %>%
+      mutate(test = map(data, function(data) {
+        res <- shapiro.test(data$score)
+        data.frame(W = res$statistic, pvalue = res$p.value)
+      })) %>%
+      select(-data) %>%
+      unnest(cols = c(test))
 
-    out <- out %>% rename(W = "statistic", pvalue = "p.value")
+  } else {
 
-    if (add_signif) out <- out %>% add_signif()
-
-    return (out)
+    res <- d %>%
+      group_by(nesting, grouping) %>%
+      nest() %>%
+      mutate(test = map(data, function(data) {
+        res <- mvn(data[, variables], mvnTest = "hz")$multivariateNormality
+        data.frame(HZ = res$HZ, pvalue = res$'p value')
+      })) %>%
+      select(-data) %>%
+      unnest(cols = c(test))
 
   }
 
-  d <- d %>% split(f = .[, nesting])
-
-  res <- do.call(rbind, lapply(d, function(d) {
-    d <- d %>% split(f = .[, grouping])
-    res <- data.frame(t(sapply(d, function(d) {
-      res <- mvn(d[, variables], mvnTest = "hz")
-      res <- res$multivariateNormality
-      return (c(HZ = res$HZ, pvalue = res$'p value'))
-    })))
-    res$habitat <- rownames(res)
-    rownames(res) <- NULL
-    return (res)
-  }))
-
-  res[[nesting]] <- gsub("\\.[0-9]", "", rownames(res))
-  rownames(res) <- NULL
-  res <- res[, c(nesting, grouping, "HZ", "pvalue")]
-
   if (add_signif) res <- res %>% add_signif()
 
-  return (res)
+  return(res)
 
 }

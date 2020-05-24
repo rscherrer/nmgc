@@ -115,11 +115,11 @@ nanova <- function(
 
   # Perform analysis on each subset
   res <- data %>%
-    group_by(nesting) %>%
-    nest() %>%
-    mutate(test = map(data, this_test, variables)) %>%
+    dplyr::group_by(nesting) %>%
+    tidyr::nest() %>%
+    dplyr::mutate(test = map(data, this_test, variables)) %>%
     dplyr::select(-data) %>%
-    unnest(cols = c(test))
+    tidyr::unnest(cols = c(test))
 
   # Add significance labels
   if (add_signif) res <- res %>% add_signif()
@@ -131,22 +131,22 @@ nanova <- function(
     # Choose what post-hoc test to perform
     phtest <- res
     if (parametric) {
-      phtest <- phtest %>% mutate(test = ifelse(best_fit %% 2 == 0, "dunnett", "tukey"))
+      phtest <- phtest %>% dplyr::mutate(test = ifelse(best_fit %% 2 == 0, "dunnett", "tukey"))
     } else {
-      phtest <- phtest %>% mutate(test = "nemenyi")
+      phtest <- phtest %>% dplyr::mutate(test = "nemenyi")
     }
-    phtest <- phtest %>% select(nesting, variable, pvalue, test)
+    phtest <- phtest %>% dplyr::select(nesting, variable, pvalue, test)
 
     # Perform posthoc tests
     ph <- data %>%
-      gather_("variable", "score", variables) %>%
-      group_by(nesting, variable) %>%
-      nest() %>%
-      right_join(phtest) %>%
-      mutate(posthoc = map2(data, test, nanova_posthoc)) %>%
-      filter(pvalue < pthreshold) %>%
-      select(-data, -pvalue) %>%
-      unnest(cols = c(posthoc))
+      tidyr::gather_("variable", "score", variables) %>%
+      dplyr::group_by(nesting, variable) %>%
+      tidyr::nest() %>%
+      dplyr::right_join(phtest) %>%
+      dplyr::mutate(posthoc = map2(data, test, nanova_posthoc)) %>%
+      dplyr::filter(pvalue < pthreshold) %>%
+      dplyr::select(-data, -pvalue) %>%
+      tidyr::unnest(cols = c(posthoc))
     if (nrow(ph) > 0 & add_signif) ph <- ph %>% add_signif()
 
   }
