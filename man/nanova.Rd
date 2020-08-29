@@ -20,7 +20,8 @@ nanova(
   seed = NULL,
   iter = 1000,
   random = NULL,
-  pthreshold = 0.05
+  pthreshold = 0.05,
+  permanova = FALSE
 )
 }
 \arguments{
@@ -44,15 +45,17 @@ nanova(
 
 \item{add_signif}{Whether to add significance asterisk labels in an extra column}
 
-\item{parametric}{Whether to perform parametric tests (linear models instead of Kruskal-Wallis if \code{univariate} is TRUE, parametric instead of semi-parametric MANOVA if \code{univariate} is FALSE)}
+\item{parametric}{Whether to perform parametric tests (linear models instead of Kruskal-Wallis if \code{univariate} is TRUE, parametric instead of nonparametric or semi-parametric MANOVA if \code{univariate} is FALSE)}
 
-\item{seed}{Optional seed for the semi-parametric MANOVA}
+\item{seed}{Optional seed for the nonparametric and semi-parametric MANOVA}
 
-\item{iter}{Number of iterations for the parametric bootstrapping of the semi-parametric MANOVA (defaults to the recommended number 1,000)}
+\item{iter}{Number of iterations for the parametric bootstrapping of the nonparametric and semi-parametric MANOVA (defaults to the recommended number 1,000)}
 
 \item{random}{Optional random effect for fitting a mixed model in univariate ANOVA}
 
 \item{pthreshold}{Threshold P-value to keep posthoc tests (set to 1 to keep all tests)}
+
+\item{permanova}{If \code{univariate} is FALSE and \code{parametric} is FALSE, whether to run a PERMANOVA (TRUE) of a semi-parametric MANOVA (FALSE).}
 }
 \value{
 A list with two objecst: \code{res}, containing the results of the variable-wise ANOVA tests, and \code{ph}, containing the results of the contrast-wise posthoc tests. \code{res} can be of multiple formats. If \code{manova} is FALSE, data frame containing the results of the ANOVAs for each variable and each subset of the data, including:
@@ -81,12 +84,22 @@ Otherwise, a data frame with MANOVA results for each subset, including, if \code
 \item{pvalue}{ P-value of the F-test}
 }
 
-otherwise, the results of a semi-parametric MANOVA, with:
+otherwise, if \code{permanova} is FALSE, the results of a semi-parametric MANOVA,
+with:
 
 \itemize{
 \item{term}{ The term being tested, probably the grouping variable}
 \item{MATS}{ The modified ANOVA-type statistic value}
 \item{pvalue}{ P-value computed from the parametric bootstrap resampling}
+}
+
+otherwise, if \code{permanova} is TRUE, the results of a PERMANOVA, with:
+
+\itemize{
+\item{df}{ The degrees of freedom}
+\item{pseudoF}{ Approximate F-statistic}
+\item{r2}{ Approximate R squared}
+\item{pvalue}{ P-value computed from permutations}
 }
 }
 \description{

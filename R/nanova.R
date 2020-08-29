@@ -12,11 +12,12 @@
 #' @param test Test to use for the MANOVA (defaults to Pillai's trace). See `?summary.manova`
 #' @param univariate Whether to perform ANOVA (TRUE) or MANOVA (FALSE)
 #' @param add_signif Whether to add significance asterisk labels in an extra column
-#' @param parametric Whether to perform parametric tests (linear models instead of Kruskal-Wallis if `univariate` is TRUE, parametric instead of semi-parametric MANOVA if `univariate` is FALSE)
-#' @param seed Optional seed for the semi-parametric MANOVA
-#' @param iter Number of iterations for the parametric bootstrapping of the semi-parametric MANOVA (defaults to the recommended number 1,000)
+#' @param parametric Whether to perform parametric tests (linear models instead of Kruskal-Wallis if `univariate` is TRUE, parametric instead of nonparametric or semi-parametric MANOVA if `univariate` is FALSE)
+#' @param seed Optional seed for the nonparametric and semi-parametric MANOVA
+#' @param iter Number of iterations for the parametric bootstrapping of the nonparametric and semi-parametric MANOVA (defaults to the recommended number 1,000)
 #' @param random Optional random effect for fitting a mixed model in univariate ANOVA
 #' @param pthreshold Threshold P-value to keep posthoc tests (set to 1 to keep all tests)
+#' @param permanova If `univariate` is FALSE and `parametric` is FALSE, whether to run a PERMANOVA (TRUE) of a semi-parametric MANOVA (FALSE).
 #'
 #' @details The analysis of variance is performed using a likelihood ratio test between a model including the factor of interest and a null model with intercept only. The LRT is done with models fitted with maximum likelihood. Model comparison between OLS and GLS is done with models fitted with restricted maximum likelihood, that include the factor to be tested (as per Zuur et al. 2009).
 #'
@@ -48,12 +49,22 @@
 #' \item{pvalue}{ P-value of the F-test}
 #' }
 #'
-#' otherwise, the results of a semi-parametric MANOVA, with:
+#' otherwise, if `permanova` is FALSE, the results of a semi-parametric MANOVA,
+#' with:
 #'
 #' \itemize{
 #' \item{term}{ The term being tested, probably the grouping variable}
 #' \item{MATS}{ The modified ANOVA-type statistic value}
 #' \item{pvalue}{ P-value computed from the parametric bootstrap resampling}
+#' }
+#'
+#' otherwise, if `permanova` is TRUE, the results of a PERMANOVA, with:
+#'
+#' \itemize{
+#' \item{df}{ The degrees of freedom}
+#' \item{pseudoF}{ Approximate F-statistic}
+#' \item{r2}{ Approximate R squared}
+#' \item{pvalue}{ P-value computed from permutations}
 #' }
 #'
 #' @export
@@ -74,7 +85,8 @@ nanova <- function(
   seed = NULL,
   iter = 1000,
   random = NULL,
-  pthreshold = 0.05
+  pthreshold = 0.05,
+  permanova = FALSE
 ) {
 
   library(tidyverse)
@@ -109,7 +121,11 @@ nanova <- function(
     if (parametric) {
       this_test <- function(x, y) nanova_manova(x, y, test = test)
     } else {
-      this_test <- function(x, y) nanova_smanova(x, y, seed = seed, iter = iter)
+      if (permanova) {
+        this_test <- function(x, y) nanova_permanova(x, y, seed = seed, iter = iter)
+      } else {
+        this_test <- function(x, y) nanova_smanova(x, y, seed = seed, iter = iter)
+      }
     }
   }
 
