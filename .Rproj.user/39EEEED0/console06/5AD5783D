@@ -904,4 +904,9 @@ Total 18 (delta 13), reused 0 (delta 0)
 remote: Resolving deltas:   0% (0/13)[Kremote: Resolving deltas:  15% (2/13)[Kremote: Resolving deltas:  23% (3/13)[Kremote: Resolving deltas:  30% (4/13)[Kremote: Resolving deltas:  38% (5/13)[Kremote: Resolving deltas:  46% (6/13)[Kremote: Resolving deltas:  53% (7/13)[Kremote: Resolving deltas:  61% (8/13)[Kremote: Resolving deltas:  69% (9/13)[Kremote: Resolving deltas:  76% (10/13)[Kremote: Resolving deltas:  84% (11/13)[Kremote: Resolving deltas:  92% (12/13)[Kremote: Resolving deltas: 100% (13/13)[Kremote: Resolving deltas: 100% (13/13), completed with 12 local objects.[K
 To github.com:rscherrer/nmgc
    0bedd55..2d3115a  master -> master
-]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ 
+[K]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ ls
+DESCRIPTION  nmgc.Rproj  scratchpad.R    vignette.html  vignette.Rmd
+[0m[01;34mman[0m          [01;34mR[0m           test.R          vignette.md
+NAMESPACE    README.md   [01;34mvignette_files[0m  vignette.pdf
+]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ rm NAMESPACE 
+]0;/home/raphael/Documents/nmgc]0;raphael@unidesktop: ~/Documents/nmgc[01;32mraphael@unidesktop[00m:[01;34m~/Documents/nmgc[00m$ git add .

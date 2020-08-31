@@ -24,6 +24,7 @@ test_multinorm <- function(d, variables, grouping, nesting = NULL, univariate = 
   }
 
   d$grouping <- d[[grouping]]
+  d$nesting <- d[[nesting]]
 
   if (univariate) {
 
@@ -41,13 +42,13 @@ test_multinorm <- function(d, variables, grouping, nesting = NULL, univariate = 
   } else {
 
     res <- d %>%
-      group_by(nesting, grouping) %>%
+      dplyr::group_by(nesting, grouping) %>%
       nest() %>%
       mutate(test = map(data, function(data) {
         res <- mvn(data[, variables], mvnTest = "hz")$multivariateNormality
         data.frame(HZ = res$HZ, pvalue = res$'p value')
       })) %>%
-      select(-data) %>%
+      dplyr::select(-data) %>%
       unnest(cols = c(test))
 
   }

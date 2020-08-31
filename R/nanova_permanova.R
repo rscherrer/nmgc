@@ -16,7 +16,7 @@ nanova_permanova <- function(data, variables, seed = NULL, iter = 1000) {
   res <- data.frame(res$aov.tab)[1,]
   rownames(res) <- NULL
   res <- res %>% rename(
-    df = "Df", pseudoF = "F.model", r2 = "R2", pvalue = "Pr..F."
+    df = "Df", pseudoF = "F.Model", r2 = "R2", pvalue = "Pr..F."
   ) %>%
     select(df, pseudoF, r2, pvalue)
 
