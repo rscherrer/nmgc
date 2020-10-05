@@ -111,9 +111,9 @@ classify <- function(
         groups <- sample(groups, replace = FALSE)
 
         # Check that each label is sufficiently represented within each training group
-        is_fine <- all(sapply(seq_len(k), function(i) {
+        is_fine <- all(sapply(seq_len(k), function(j) {
 
-          represented <- table(data[which(groups != i), grouping])
+          represented <- table(data[which(groups != j), grouping])
           if (!all(labels %in% names(represented))) return (FALSE)
           return (all(represented > minsize))
 
@@ -122,10 +122,10 @@ classify <- function(
       }
 
       # For each testing group...
-      lapply(seq_len(k), function(i) {
+      lapply(seq_len(k), function(j) {
 
         # Sample indices for a training dataset
-        training <- which(groups != i)
+        training <- which(groups != j)
 
         assert_that(length(training) < nrow(data))
 
@@ -163,12 +163,12 @@ classify <- function(
         }
 
         # Predict the labels of the remaining data
-        predictions <- predict(machine, newdata = data[groups == i, variables])
+        predictions <- predict(machine, newdata = data[groups == j, variables])
 
         if (method == "LDA") predictions <- predictions$class
 
         # Compare true and predicted labels
-        conf <- table(predictions, data[groups == i, grouping])
+        conf <- table(predictions, data[groups == j, grouping])
 
         if (!return_machine) machine <- NULL
 
