@@ -16,6 +16,8 @@
 #' @param add_signif Whether to add significance asterisk labels in an extra column
 #'
 #' @return A list with two data frames: one with the results of the correlation test on each subset, including observed Pearson's correlation, P-values and number of sites, and the second with the geographical coordinates and means of each trait for every site in the data.
+#'
+#' @export
 
 nspcortest <- function(
   data, variables, nesting = NULL, nperm = 1000, seed = NULL, lon = "longitude",
