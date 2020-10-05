@@ -25,6 +25,7 @@ Imports:
    MASS,
    assertthat,
    heplots,
+   vegan,
    MVN,
    MANOVA.RM,
    PMCMRplus

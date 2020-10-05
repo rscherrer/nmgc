@@ -80,7 +80,7 @@ classify <- function(
   assert_that(floor(ptesting * nrow(data)) > 0)
 
   # Define the possible labels
-  labels <- levels(data[, grouping])
+  labels <- unique(data[, grouping])
 
   nested <- TRUE
 
