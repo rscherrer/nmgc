@@ -68,8 +68,6 @@ plot_classif(
 }
 \value{
 A ggplot
-
-
 }
 \description{
 Plot the output of the \code{classify} function

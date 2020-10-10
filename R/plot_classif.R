@@ -23,7 +23,7 @@
 #'
 #' @return A ggplot
 #'
-#' @return
+#' @export
 
 plot_classif <- function(
   res, facets = NULL, bins = 15, fill = "seagreen", alpha = 0.5, ylim = c(0, 200),
