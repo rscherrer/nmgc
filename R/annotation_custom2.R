@@ -14,13 +14,17 @@
 #' @export
 
 # This function allows us to specify which facet to annotate
-annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data)
-{
+annotation_custom2 <- function (
+  grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data
+) {
   layer(
     data = data,
     stat = StatIdentity,
     position = PositionIdentity,
     geom = ggplot2:::GeomCustomAnn,
-    inherit.aes = TRUE, params = list(grob = grob, xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)
+    inherit.aes = TRUE,
+    params = list(
+      grob = grob, xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax
+    )
   )
 }

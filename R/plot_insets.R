@@ -12,11 +12,17 @@
 #' @export
 
 
-plot_insets <- function(data, plotfun, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, facets = NULL) {
+plot_insets <- function(
+  data, plotfun, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, facets = NULL
+) {
 
   library(tidyverse)
 
-  if (!is.null(facets)) data <- split(data, data[, facets]) else data <- list(data)
+  if (!is.null(facets)) {
+    data <- split(data, data[, facets])
+  } else {
+    data <- list(data)
+  }
 
   data %>%
     purrr::map(~annotation_custom2(

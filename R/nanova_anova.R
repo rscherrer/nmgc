@@ -12,9 +12,10 @@ nanova_anova <- function(data, variables, random = NULL) {
     # Fit candidate models with different variance structures
 
     # Note: when using model fitting functions inside another function, avoid
-    # passing them formulas as objects programatically, that will cause the anova.lme
-    # call to crash. Instead create extra columns in the data frame with specific names
-    # and explicitly pass those columns into the model fitting function
+    # passing them formulas as objects programatically, that will cause the
+    # anova.lme call to crash. Instead create extra columns in the data frame
+    # with specific names and explicitly pass those columns into the model
+    # fitting function
 
     # Regular ANOVA
     mod1 <- gls(X ~ group, data = data)
@@ -57,7 +58,9 @@ nanova_anova <- function(data, variables, random = NULL) {
     weights <- weights / sum(weights)
     best_weight <- weights[best]
 
-    # AIC weights from Burnham, K. P., and D. R. Anderson. 2002. Model selection and multimodel inference : a practical information-theoretic approach. Springer, New York.
+    # AIC weights from Burnham, K. P., and D. R. Anderson. 2002.
+    # Model selection and multimodel inference : a practical
+    # information-theoretic approach. Springer, New York.
 
     # Refit the model with maximum likelihood (instead of REML)
     best_mod <- update(best_mod, method = "ML")

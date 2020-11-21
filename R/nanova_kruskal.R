@@ -8,6 +8,7 @@ nanova_kruskal <- function(data, variables) {
     res <- kruskal.test(data[[variable]], data[["group"]])
     res <- with(res, data.frame(statistic, parameter, p.value))
   }, data, .id = "variable")
-  res <- res %>% rename(chisq = "statistic", df = "parameter", pvalue = "p.value")
+  res <- res %>%
+    rename(chisq = "statistic", df = "parameter", pvalue = "p.value")
 
 }

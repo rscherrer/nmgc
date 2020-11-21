@@ -26,10 +26,30 @@
 #' @export
 
 plot_classif <- function(
-  res, facets = NULL, bins = 15, fill = "seagreen", alpha = 0.5, ylim = c(0, 200),
-  norm = 2, low = "white", high = "darkgreen", limits = c(0, 1), xmin = 0, xmax = 0.35,
-  ymin = 120, ymax = 200, dfac = 500, rounding = 4, signif = 0.05, px = 1, py = 190,
-  phjust = 1, type = "histogram", add_insets = TRUE, add_null = TRUE, add_pvalues = TRUE
+  res,
+  facets = NULL,
+  bins = 15,
+  fill = "seagreen",
+  alpha = 0.5,
+  ylim = c(0, 200),
+  norm = 2,
+  low = "white",
+  high = "darkgreen",
+  limits = c(0, 1),
+  xmin = 0,
+  xmax = 0.35,
+  ymin = 120,
+  ymax = 200,
+  dfac = 500,
+  rounding = 4,
+  signif = 0.05,
+  px = 1,
+  py = 190,
+  phjust = 1,
+  type = "histogram",
+  add_insets = TRUE,
+  add_null = TRUE,
+  add_pvalues = TRUE
 ) {
 
   library(tidyverse)
@@ -44,8 +64,16 @@ plot_classif <- function(
   if (!is.null(facets)) p <- p + facet_wrap(. ~ get(facets))
 
   conf <- res$avg
-  if (norm > 0) conf <- conf %>% map(~ .x %>% apply(., norm, function(x) x / sum(x)))
-  conf <- conf %>% map_dfr(~ .x %>% data.frame %>% rownames_to_column("predicted") %>% gather_("true", "freq", colnames(.x)), .id = ".id")
+  if (norm > 0) conf <- conf %>%
+    map(~ .x %>% apply(., norm, function(x) x / sum(x)))
+  conf <- conf %>%
+    map_dfr(
+      ~ .x %>%
+        data.frame %>%
+        rownames_to_column("predicted") %>%
+        gather_("true", "freq", colnames(.x)),
+      .id = ".id"
+    )
   conf <- conf %>% mutate(accu = 1)
   if (!is.null(facets)) colnames(conf)[colnames(conf) == ".id"] <- facets
 
@@ -90,16 +118,22 @@ plot_classif <- function(
       .id = ".id")
   if (!is.null(facets)) colnames(null)[colnames(null) == ".id"] <- facets
 
-  if (add_null) p <- p + geom_line(data = null, aes(x = accu, y = density * dfac), lty = 2)
+  if (add_null) p <- p +
+    geom_line(data = null, aes(x = accu, y = density * dfac), lty = 2)
 
   pround <- 1 / 10^rounding
   res$mean <- res$mean %>% mutate(
     plabel = round(pvalue, rounding) %>% paste("P =", .) %>%
-      ifelse(pvalue < pround, paste("P <", format(pround, scientific = FALSE)), .) %>%
+      ifelse(
+        pvalue < pround, paste("P <", format(pround, scientific = FALSE)), .
+      ) %>%
       ifelse(pvalue < signif, str_replace(., "$", "*"), .)
   )
 
-  if (add_pvalues) p <- p + geom_text(data = res$mean, aes(label = plabel), x = px, y = py, hjust = phjust)
+  if (add_pvalues) p <- p +
+    geom_text(
+      data = res$mean, aes(label = plabel), x = px, y = py, hjust = phjust
+    )
 
   return (p)
 }

@@ -122,9 +122,13 @@ nanova <- function(
       this_test <- function(x, y) nanova_manova(x, y, test = test)
     } else {
       if (permanova) {
-        this_test <- function(x, y) nanova_permanova(x, y, seed = seed, iter = iter)
+        this_test <- function(x, y) {
+          nanova_permanova(x, y, seed = seed, iter = iter)
+        }
       } else {
-        this_test <- function(x, y) nanova_smanova(x, y, seed = seed, iter = iter)
+        this_test <- function(x, y) {
+          nanova_smanova(x, y, seed = seed, iter = iter)
+        }
       }
     }
   }
@@ -140,14 +144,15 @@ nanova <- function(
   # Add significance labels
   if (add_signif) res <- res %>% add_signif()
 
-  if (!univariate) posthoc <- FALSE # we don't do multivariate posthoc tests around here
+  if (!univariate) posthoc <- FALSE # we don't do multivariate posthoc tests
   ph <- NULL
   if (posthoc) {
 
     # Choose what post-hoc test to perform
     phtest <- res
     if (parametric) {
-      phtest <- phtest %>% dplyr::mutate(test = ifelse(best_fit %% 2 == 0, "dunnett", "tukey"))
+      phtest <- phtest %>%
+        dplyr::mutate(test = ifelse(best_fit %% 2 == 0, "dunnett", "tukey"))
     } else {
       phtest <- phtest %>% dplyr::mutate(test = "nemenyi")
     }

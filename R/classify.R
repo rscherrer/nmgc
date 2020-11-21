@@ -69,7 +69,12 @@ classify <- function(
   library(pbapply)
 
   if (!is.null(to_pcomp)) data <- data %>%
-      cbind(npcomp(data, to_pcomp, center, scale, nesting, combine = TRUE, reduce = variables)$x)
+      cbind(
+        npcomp(
+          data, to_pcomp, center, scale, nesting, combine = TRUE,
+          reduce = variables
+        )$x
+      )
 
   # Random seed
   if (!is.null(seed)) set.seed(seed)
@@ -106,11 +111,14 @@ classify <- function(
 
         # Randomly assign data to k testing groups
         groups <- rep(seq_len(k), each = floor(ptesting * nrow(data)))
-        if (length(groups) < nrow(data)) groups <- c(groups, seq_len(nrow(data) - length(groups)))
+        if (length(groups) < nrow(data)) {
+          groups <- c(groups, seq_len(nrow(data) - length(groups)))
+        }
         assert_that(length(groups) == nrow(data))
         groups <- sample(groups, replace = FALSE)
 
-        # Check that each label is sufficiently represented within each training group
+        # Check that each label is sufficiently represented within each training
+        # group
         is_fine <- all(sapply(seq_len(k), function(j) {
 
           represented <- table(data[which(groups != j), grouping])
@@ -129,24 +137,43 @@ classify <- function(
 
         assert_that(length(training) < nrow(data))
 
-        # Downsample the training dataset to the size of the least represented label
+        # Downsample the training dataset to the size of the least represented
+        # label
         targetsize <- min(table(data[training, grouping]))
-        training <- do.call("c", lapply(labels, function(lab) sample(training[data[training, grouping] == lab], targetsize, replace = FALSE)))
+        training <- do.call(
+          "c",
+          lapply(
+            labels,
+            function(lab) {
+              sample(
+                training[data[training, grouping] == lab], targetsize,
+                replace = FALSE
+              )
+            }
+          )
+        )
 
         assert_that(all(table(data[training, grouping]) == targetsize))
 
         # Set up model formula
-        model <- as.formula(paste(grouping, "~", paste(variables, collapse = " + ")))
+        model <- as.formula(
+          paste(grouping, "~", paste(variables, collapse = " + "))
+        )
 
         if (method == "SVM") {
 
           # Fit a support vector machine to the data
-          machine <- fit(model, data = data[training, c(variables, grouping)], model = "svm", kernel = "rbfdot", task = "class")
+          machine <- fit(
+            model, data = data[training, c(variables, grouping)], model = "svm",
+            kernel = "rbfdot", task = "class"
+          )
 
         } else if (method == "LDA") {
 
           # Or a linear discriminant analysis
-          machine <- lda(formula = model, data = data[training, c(variables, grouping)])
+          machine <- lda(
+            formula = model, data = data[training, c(variables, grouping)]
+          )
 
         } else stop("unknown method")
 
@@ -154,9 +181,14 @@ classify <- function(
         imp <- NULL
         if (importance) {
           if (method == "LDA") {
-            imp <- Importance(machine, data = data[training, c(variables, grouping)], PRED = function(M, data) predict(M, data)$class)
+            imp <- Importance(
+              machine, data = data[training, c(variables, grouping)],
+              PRED = function(M, data) predict(M, data)$class
+            )
           } else  if (method == "SVM") {
-            imp <- Importance(machine, data = data[training, c(variables, grouping)])
+            imp <- Importance(
+              machine, data = data[training, c(variables, grouping)]
+            )
           }
           imp <- imp$imp[seq_along(variables)]
           names(imp) <- variables
@@ -182,14 +214,23 @@ classify <- function(
 
     confs <- results %>% map(~ map(.x, ~ map(.x, "conf")))
     avg <- confs %>% map(~ mavg(.x %>% map(mavg)))
-    accu <- confs %>% map(~ do.call("c" , .x)) %>% map_dfr(~ map_dbl(.x, pdiag)) %>% gather(key = "nesting", value = "accu")
+    accu <- confs %>%
+      map(~ do.call("c" , .x)) %>% map_dfr(~ map_dbl(.x, pdiag)) %>%
+      gather(key = "nesting", value = "accu")
     mean <- accu %>% group_by(nesting) %>% summarize(accu = mean(accu))
 
     colnames(accu)[colnames(accu) == "nesting"] <- nesting
     colnames(mean)[colnames(mean) == "nesting"] <- nesting
 
     if (importance) {
-      imp <- results %>% map(~ .x %>% map_dfr(~ do.call("rbind", .x %>% map(~ pluck(.x, "imp"))) %>% data.frame())) %>%
+      imp <- results %>%
+        map(
+          ~ .x %>%
+            map_dfr(
+              ~ do.call("rbind", .x %>% map(~ pluck(.x, "imp"))) %>%
+                data.frame()
+            )
+        ) %>%
         map2_dfr(names(.), ~ .x %>% mutate(nesting = .y))
       colnames(imp)[colnames(imp) == "nesting"] <- nesting
     } else imp <- NULL
@@ -200,7 +241,9 @@ classify <- function(
           n = map_int(data, nrow),
           ptest = ptesting,
           ntest = floor(ptest * n),
-          pvalue = 1 - pbinom(accu * ntest, size = ntest, prob = 1 / length(labels))
+          pvalue = 1 - pbinom(
+            accu * ntest, size = ntest, prob = 1 / length(labels)
+          )
         )
       if (add_signif) mean <- mean %>% add_signif()
     }

@@ -19,13 +19,22 @@
 #'
 #' @export
 
-npcomp <- function(data, variables, center = TRUE, scale = TRUE, nesting = NULL, combine = TRUE, reduce = NULL) {
+npcomp <- function(
+  data, variables, center = TRUE, scale = TRUE, nesting = NULL, combine = TRUE,
+  reduce = NULL
+) {
 
   library(tidyverse)
 
-  if (is.null(nesting)) data <- list(data) else data <- data %>% split(.[[nesting]])
+  if (is.null(nesting)) {
+    data <- list(data) else data <- data %>% split(.[[nesting]])
+  }
   data <- data %>%
-    map(~ .x %>% dplyr::select(all_of(variables)) %>% prcomp(center = center, scale = scale))
+    map(
+      ~ .x %>%
+        dplyr::select(all_of(variables)) %>%
+        prcomp(center = center, scale = scale)
+    )
 
   if (is.null(nesting)) return(data[[1]])
 
@@ -33,9 +42,19 @@ npcomp <- function(data, variables, center = TRUE, scale = TRUE, nesting = NULL,
 
   if (combine) {
 
-    sdev <- data %>% map_dfr(~ (.x$sdev / sum(.x$sdev))[reduce] %>% rbind %>% data.frame, .id = nesting)
+    sdev <- data %>%
+      map_dfr(
+        ~ (.x$sdev / sum(.x$sdev))[reduce] %>% rbind %>% data.frame,
+        .id = nesting
+      )
     colnames(sdev) <- c(nesting, paste0("PC", reduce))
-    rotation <- data %>% map_dfr(~ .x$rotation[, reduce] %>% data.frame %>% rownames_to_column("variable"), .id = nesting)
+    rotation <- data %>%
+      map_dfr(
+        ~ .x$rotation[, reduce] %>%
+          data.frame %>%
+          rownames_to_column("variable"),
+        .id = nesting
+      )
     x <- data %>% map_dfr(~ .x$x[, reduce] %>% data.frame, .id = nesting)
     out <- list(sdev = sdev, rotation = rotation, x = x)
 
