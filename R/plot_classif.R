@@ -52,8 +52,6 @@ plot_classif <- function(
   add_pvalues = TRUE
 ) {
 
-  library(tidyverse)
-
   p <- res$accu %>%
     ggplot2::ggplot(ggplot2::aes(x = accu)) +
     ggplot2::geom_histogram(bins = bins, fill = fill, alpha = alpha) +

@@ -62,12 +62,6 @@ classify <- function(
   add_signif = TRUE
 ) {
 
-  library(rminer)
-  library(MASS)
-  library(assertthat)
-  library(tidyverse)
-  library(pbapply)
-
   if (!is.null(to_pcomp)) data <- data %>%
       cbind(
         npcomp(

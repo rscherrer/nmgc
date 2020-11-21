@@ -13,9 +13,6 @@
 
 test_outliers <- function(d, variables, grouping, nesting = NULL) {
 
-  library(tidyverse)
-  library(MVN)
-
   if (is.null(nesting)) {
     d$nesting <- factor(1)
     nesting <- "nesting"

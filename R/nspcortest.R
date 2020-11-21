@@ -27,10 +27,6 @@ nspcortest <- function(
 
   # Spatial autocorrelation by permutation test
 
-  library(geosphere)
-  library(tidyverse)
-  library(pbapply)
-
   if (!is.null(to_pcomp)) data <- data %>%
       cbind(npcomp(
         data, to_pcomp, center, scale, nesting, combine = TRUE,

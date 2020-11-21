@@ -5,7 +5,6 @@
 #'
 #' @export
 
-
 mrep <- function(x, n) {
   do.call("c", mapply(function(x, n) rep(x, n), x, n, SIMPLIFY = FALSE))
 }

@@ -24,8 +24,6 @@ npcomp <- function(
   reduce = NULL
 ) {
 
-  library(tidyverse)
-
   if (is.null(nesting)) {
     data <- list(data) else data <- data %>% split(.[[nesting]])
   }

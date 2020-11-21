@@ -2,9 +2,6 @@
 
 nanova_anova <- function(data, variables, random = NULL) {
 
-  library(nlme)
-  library(MuMIn)
-
   map_dfr(variables, function(variable, data) {
 
     data$X <- data[[variable]]
@@ -18,26 +15,26 @@ nanova_anova <- function(data, variables, random = NULL) {
     # fitting function
 
     # Regular ANOVA
-    mod1 <- gls(X ~ group, data = data)
+    mod1 <- nlme::gls(X ~ group, data = data)
 
     # ANOVA with one variance per group
-    mod2 <- gls(
+    mod2 <- nlme::gls(
       X ~ group, data = data,
-      weights = varIdent(form = ~ 1 | group)
+      weights = nlme::varIdent(form = ~ 1 | group)
     )
     models <- list(mod1, mod2)
 
     # Optional equivalents with one added random effect
     if (!is.null(random)) {
-      mod3 <- lme(
+      mod3 <- nlme::lme(
         X ~ group,
         data = data,
         random = formula(paste("~ 1 |", random))
       )
-      mod4 <- lme(
+      mod4 <- nlme::lme(
         X ~ group,
         data = data,
-        weights = varIdent(form = ~ 1 | group),
+        weights = nlme::varIdent(form = ~ 1 | group),
         random = formula(paste("~ 1 |", random))
       )
       models[[3]] <- mod3
@@ -45,7 +42,7 @@ nanova_anova <- function(data, variables, random = NULL) {
     }
 
     # Compare the AICc of the models
-    aiccs <- unlist(do.call("AICc", models))
+    aiccs <- unlist(do.call("MuMIn::AICc", models))
     dfs <- unname(aiccs[grep("df", names(aiccs))])
     aiccs <- unname(aiccs[grep("AICc", names(aiccs))])
     best <- which(aiccs == min(aiccs))

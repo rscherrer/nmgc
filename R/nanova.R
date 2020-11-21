@@ -89,8 +89,6 @@ nanova <- function(
   permanova = FALSE
 ) {
 
-  library(tidyverse)
-
   # Compute principal components if needed
   if (!is.null(to_pcomp)) data <- data %>%
       cbind(

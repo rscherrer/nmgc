@@ -16,8 +16,6 @@ plot_insets <- function(
   data, plotfun, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, facets = NULL
 ) {
 
-  library(tidyverse)
-
   if (!is.null(facets)) {
     data <- split(data, data[, facets])
   } else {
