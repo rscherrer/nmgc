@@ -26,7 +26,7 @@ plot_insets <- function(
 
   data %>%
     purrr::map(~annotation_custom2(
-      grob = ggplotGrob(plotfun(.)),
+      grob = ggplot2::ggplotGrob(plotfun(.)),
       xmin = xmin,
       xmax = xmax,
       ymin = ymin,

@@ -26,8 +26,8 @@ test_outliers <- function(d, variables, grouping, nesting = NULL) {
     d <- d %>% split(f = .[, grouping])
 
     res <- lapply(d, function(d) {
-      res <- mvn(d[, variables], mvnTest = "hz", showOutliers = TRUE)
-      res$multivariateOutliers
+      res <- MVN::mvn(d[, variables], mvnTest = "hz", showOutliers = TRUE)
+      res$multivariateOutlierss
     })
 
     return (res)

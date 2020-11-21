@@ -55,36 +55,38 @@ plot_classif <- function(
   library(tidyverse)
 
   p <- res$accu %>%
-    ggplot(aes(x = accu)) +
-    geom_histogram(bins = bins, fill = fill, alpha = alpha) +
-    theme_bw() +
-    theme(panel.grid = element_blank()) +
-    labs(x = "Generalization accuracy", y = "Count") +
-    lims(x = c(0, 1), y = ylim)
-  if (!is.null(facets)) p <- p + facet_wrap(. ~ get(facets))
+    ggplot2::ggplot(ggplot2::aes(x = accu)) +
+    ggplot2::geom_histogram(bins = bins, fill = fill, alpha = alpha) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(panel.grid = ggplot2::element_blank()) +
+    ggplot2::labs(x = "Generalization accuracy", y = "Count") +
+    ggplot2::lims(x = c(0, 1), y = ylim)
+  if (!is.null(facets)) p <- p + ggplot2::facet_wrap(. ~ get(facets))
 
   conf <- res$avg
   if (norm > 0) conf <- conf %>%
-    map(~ .x %>% apply(., norm, function(x) x / sum(x)))
+    purrr::map(~ .x %>% apply(., norm, function(x) x / sum(x)))
   conf <- conf %>%
-    map_dfr(
+    purrr::map_dfr(
       ~ .x %>%
         data.frame %>%
-        rownames_to_column("predicted") %>%
-        gather_("true", "freq", colnames(.x)),
+        tibble::rownames_to_column("predicted") %>%
+        tidyr::gather_("true", "freq", colnames(.x)),
       .id = ".id"
     )
-  conf <- conf %>% mutate(accu = 1)
+  conf <- conf %>% dplyr::mutate(accu = 1)
   if (!is.null(facets)) colnames(conf)[colnames(conf) == ".id"] <- facets
 
   if (type == "confusion") {
 
-    p <- ggplot(conf, aes(x = true, y = predicted, fill = freq)) +
-      geom_tile() +
-      theme_bw() +
-      scale_fill_gradient(low = low, high = high, limits = limits) +
-      labs(x = "True", y = "Predicted", fill = "Frequency")
-    if (!is.null(facets)) p <- p + facet_wrap(. ~ facets)
+    p <- ggplot2::ggplot(
+      conf, ggplot2::aes(x = true, y = predicted, fill = freq)
+    ) +
+      ggplot2::geom_tile() +
+      ggplot2::theme_bw() +
+      ggplot2::scale_fill_gradient(low = low, high = high, limits = limits) +
+      ggplot2::labs(x = "True", y = "Predicted", fill = "Frequency")
+    if (!is.null(facets)) p <- p + ggplot2::facet_wrap(. ~ facets)
     return (p)
 
   }
@@ -92,14 +94,14 @@ plot_classif <- function(
   insets <- plot_insets(
     conf,
     plotfun = function(x) {
-      p <- ggplot(x) +
-        geom_tile(aes(x = true, y = predicted, fill = freq)) +
-        theme_bw() +
-        scale_fill_gradient(low = low, high = high, limits = limits) +
-        scale_x_discrete(breaks = NULL) +
-        scale_y_discrete(breaks = NULL) +
-        labs(x = NULL, y = NULL) +
-        theme(legend.position = "none")
+      p <- ggplot2::ggplot(x) +
+        ggplot2::geom_tile(ggplot2::aes(x = true, y = predicted, fill = freq)) +
+        ggplot2::theme_bw() +
+        ggplot2::scale_fill_gradient(low = low, high = high, limits = limits) +
+        ggplot2::scale_x_discrete(breaks = NULL) +
+        ggplot2::scale_y_discrete(breaks = NULL) +
+        ggplot2::labs(x = NULL, y = NULL) +
+        ggplot2::theme(legend.position = "none")
     },
     xmin = xmin,
     xmax = xmax,
@@ -112,27 +114,30 @@ plot_classif <- function(
 
   ngroups <- nlevels(factor(conf$true))
   null <- res$mean$ntest %>%
-    map_dfr(~ data.frame(
+    purrr::map_dfr(~ data.frame(
       density = dbinom(seq(0, .x), size = .x, prob = 1 / ngroups),
       accu = seq(0, .x) / .x),
       .id = ".id")
   if (!is.null(facets)) colnames(null)[colnames(null) == ".id"] <- facets
 
   if (add_null) p <- p +
-    geom_line(data = null, aes(x = accu, y = density * dfac), lty = 2)
+    ggplot2::geom_line(
+      data = null, ggplot2::aes(x = accu, y = density * dfac), lty = 2
+    )
 
   pround <- 1 / 10^rounding
-  res$mean <- res$mean %>% mutate(
+  res$mean <- res$mean %>% dplyr::mutate(
     plabel = round(pvalue, rounding) %>% paste("P =", .) %>%
       ifelse(
         pvalue < pround, paste("P <", format(pround, scientific = FALSE)), .
       ) %>%
-      ifelse(pvalue < signif, str_replace(., "$", "*"), .)
+      ifelse(pvalue < signif, stringr::str_replace(., "$", "*"), .)
   )
 
   if (add_pvalues) p <- p +
-    geom_text(
-      data = res$mean, aes(label = plabel), x = px, y = py, hjust = phjust
+    ggplot2::geom_text(
+      data = res$mean,
+      ggplot2::aes(label = plabel), x = px, y = py, hjust = phjust
     )
 
   return (p)

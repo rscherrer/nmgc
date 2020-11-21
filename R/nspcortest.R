@@ -41,7 +41,7 @@ nspcortest <- function(
   if (!is.null(seed)) set.seed(seed)
 
   if (!verbose) pb <- FALSE
-  if (pb) thissapply <- pbsapply else thissapply <- sapply
+  if (pb) thissapply <- pbapply::pbsapply else thissapply <- sapply
 
   if (is.null(nesting)) {
     data$nesting <- factor(1)
@@ -50,9 +50,9 @@ nspcortest <- function(
 
   # Sampling site data (return this one)
   sites <- data %>%
-    group_by_at(c(nesting, lon, lat, keep)) %>%
+    dplyr::group_by_at(c(nesting, lon, lat, keep)) %>%
     dplyr::select(variables) %>%
-    summarize_all(mean)
+    dplyr::summarize_all(mean)
 
   out <- sites
 
@@ -64,12 +64,16 @@ nspcortest <- function(
 
   # For each island...
   res <- list(data, sites) %>%
-    pmap_dfr(function(data, sites) {
+    purrr::pmap_dfr(function(data, sites) {
 
       if (verbose) message(data[1, nesting])
 
       # Calculate geographic distances between sites
-      geodist <- c(as.dist(distm(sites[, c(lon, lat)], fun = distGeo)))
+      geodist <- c(
+        as.dist(
+          geosphere::distm(sites[, c(lon, lat)], fun = geosphere::distGeo)
+        )
+      )
 
       # Phenotypic distance between sites
       phedist <- c(as.dist(dist(sites[, variables])))
@@ -78,7 +82,7 @@ nspcortest <- function(
       robs <- cor(geodist, phedist)
 
       # For each permutation...
-      rperms <- pbsapply(seq_len(nperm), function(i) {
+      rperms <- pbapply::pbsapply(seq_len(nperm), function(i) {
 
         # Reshuffle individuals across sites
         permuted <- sample(nrow(data), nrow(data), replace = FALSE)
@@ -86,8 +90,8 @@ nspcortest <- function(
 
         # Recompute the average phenotype per site
         sites <- data %>%
-          group_by(site) %>%
-          summarize_at(variables, mean)
+          dplyr::group_by(site) %>%
+          dplyr::summarize_at(variables, mean)
 
         # Recompute the phenotypic distance between sites
         phedist <- c(as.dist(dist(sites[, variables])))
@@ -103,7 +107,7 @@ nspcortest <- function(
       data.frame(robs = robs, pvalue = pvalue)
 
     }, .id = nesting) %>%
-    mutate(nsites = sapply(sites, nrow))
+    dplyr::mutate(nsites = sapply(sites, nrow))
 
   if (add_signif) {
     res <- res %>% add_signif()

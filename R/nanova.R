@@ -93,10 +93,14 @@ nanova <- function(
 
   # Compute principal components if needed
   if (!is.null(to_pcomp)) data <- data %>%
-      cbind(npcomp(
-        data, to_pcomp, center, scale, nesting, combine = TRUE,
-        reduce = variables
-      )$x %>% data.frame %>% dplyr::select(-nesting))
+      cbind(
+        npcomp(
+          data, to_pcomp, center, scale, nesting, combine = TRUE,
+          reduce = variables
+        )$x %>%
+          data.frame %>%
+          dplyr::select(-nesting)
+      )
 
   # Nested or unnested design
   if (is.null(nesting)) {

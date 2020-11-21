@@ -31,27 +31,27 @@ test_multinorm <- function(
   if (univariate) {
 
     res <- d %>%
-      gather_("variable", "score", variables) %>%
-      group_by(nesting, grouping, variable) %>%
-      nest() %>%
-      mutate(test = map(data, function(data) {
+      tidyr::gather_("variable", "score", variables) %>%
+      dplyr::group_by(nesting, grouping, variable) %>%
+      purrr::nest() %>%
+      dplyr::mutate(test = purrr::map(data, function(data) {
         res <- shapiro.test(data$score)
         data.frame(W = res$statistic, pvalue = res$p.value)
       })) %>%
-      select(-data) %>%
-      unnest(cols = c(test))
+      dplyr::select(-data) %>%
+      purrr::unnest(cols = c(test))
 
   } else {
 
     res <- d %>%
       dplyr::group_by(nesting, grouping) %>%
-      nest() %>%
-      mutate(test = map(data, function(data) {
-        res <- mvn(data[, variables], mvnTest = "hz")$multivariateNormality
+      purrr::nest() %>%
+      dplyr::mutate(test = purrr::map(data, function(data) {
+        res <- MVN::mvn(data[, variables], mvnTest = "hz")$multivariateNormality
         data.frame(HZ = res$HZ, pvalue = res$'p value')
       })) %>%
       dplyr::select(-data) %>%
-      unnest(cols = c(test))
+      purrr::unnest(cols = c(test))
 
   }
 

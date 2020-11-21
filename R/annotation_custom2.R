@@ -17,10 +17,10 @@
 annotation_custom2 <- function (
   grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data
 ) {
-  layer(
+  ggplot2::layer(
     data = data,
-    stat = StatIdentity,
-    position = PositionIdentity,
+    stat = ggplot2::StatIdentity,
+    position = ggplot2::PositionIdentity,
     geom = ggplot2:::GeomCustomAnn,
     inherit.aes = TRUE,
     params = list(

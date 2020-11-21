@@ -49,12 +49,12 @@ test_covariance <- function(
 
     }
 
-    fit <- boxM(as.matrix(d[, variables]), d[[grouping]])
+    fit <- heplots::boxM(as.matrix(d[, variables]), d[[grouping]])
     return (c(chisq = fit$statistic, df = fit$parameter, pvalue = fit$p.value))
 
   }) %>% do.call("rbind", .) %>% data.frame
 
-  res <- res %>% rownames_to_column(nesting)
+  res <- res %>% tibble::rownames_to_column(nesting)
 
   if (!univariate) colnames(res) <- c(nesting, "chisq", "df", "pvalue")
 

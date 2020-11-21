@@ -81,8 +81,8 @@ classify <- function(
 
   ptesting <- 1 / k
 
-  assert_that(nrow(data) > k)
-  assert_that(floor(ptesting * nrow(data)) > 0)
+  assertthat::assert_that(nrow(data) > k)
+  assertthat::assert_that(floor(ptesting * nrow(data)) > 0)
 
   # Define the possible labels
   labels <- unique(data[, grouping])
@@ -99,7 +99,13 @@ classify <- function(
 
   if (!verbose) pb <- FALSE
   thislapply1 <- thislapply2 <- lapply
-  if (pb) if (nested) thislapply1 <- pblapply else thislapply2 <- pblapply
+  if (pb) {
+    if (nested) {
+      thislapply1 <- pbapply::pblapply
+    } else {
+      thislapply2 <- pbapply::pblapply
+    }
+  }
 
   results <- thislapply1(data, function(data) {
 
@@ -114,7 +120,7 @@ classify <- function(
         if (length(groups) < nrow(data)) {
           groups <- c(groups, seq_len(nrow(data) - length(groups)))
         }
-        assert_that(length(groups) == nrow(data))
+        assertthat::assert_that(length(groups) == nrow(data))
         groups <- sample(groups, replace = FALSE)
 
         # Check that each label is sufficiently represented within each training
@@ -135,7 +141,7 @@ classify <- function(
         # Sample indices for a training dataset
         training <- which(groups != j)
 
-        assert_that(length(training) < nrow(data))
+        assertthat::assert_that(length(training) < nrow(data))
 
         # Downsample the training dataset to the size of the least represented
         # label
@@ -153,7 +159,9 @@ classify <- function(
           )
         )
 
-        assert_that(all(table(data[training, grouping]) == targetsize))
+        assertthat::assert_that(
+          all(table(data[training, grouping]) == targetsize)
+        )
 
         # Set up model formula
         model <- as.formula(
@@ -163,7 +171,7 @@ classify <- function(
         if (method == "SVM") {
 
           # Fit a support vector machine to the data
-          machine <- fit(
+          machine <- rminer::fit(
             model, data = data[training, c(variables, grouping)], model = "svm",
             kernel = "rbfdot", task = "class"
           )
@@ -171,7 +179,7 @@ classify <- function(
         } else if (method == "LDA") {
 
           # Or a linear discriminant analysis
-          machine <- lda(
+          machine <- MASS::lda(
             formula = model, data = data[training, c(variables, grouping)]
           )
 
@@ -181,12 +189,12 @@ classify <- function(
         imp <- NULL
         if (importance) {
           if (method == "LDA") {
-            imp <- Importance(
+            imp <- rminer::Importance(
               machine, data = data[training, c(variables, grouping)],
               PRED = function(M, data) predict(M, data)$class
             )
           } else  if (method == "SVM") {
-            imp <- Importance(
+            imp <- rminer::Importance(
               machine, data = data[training, c(variables, grouping)]
             )
           }
@@ -212,33 +220,38 @@ classify <- function(
 
   if (digest) {
 
-    confs <- results %>% map(~ map(.x, ~ map(.x, "conf")))
-    avg <- confs %>% map(~ mavg(.x %>% map(mavg)))
+    confs <- results %>% purrr::map(~ purrr::map(.x, ~ purrr::map(.x, "conf")))
+    avg <- confs %>% purrr::map(~ mavg(.x %>% purrr::map(mavg)))
     accu <- confs %>%
-      map(~ do.call("c" , .x)) %>% map_dfr(~ map_dbl(.x, pdiag)) %>%
-      gather(key = "nesting", value = "accu")
-    mean <- accu %>% group_by(nesting) %>% summarize(accu = mean(accu))
+      purrrr::map(~ do.call("c" , .x)) %>%
+      purrr::map_dfr(~ purrr::map_dbl(.x, pdiag)) %>%
+      tidyr::gather(key = "nesting", value = "accu")
+    mean <- accu %>%
+      dplyr::group_by(nesting) %>%
+      dplyr::summarize(accu = mean(accu))
 
     colnames(accu)[colnames(accu) == "nesting"] <- nesting
     colnames(mean)[colnames(mean) == "nesting"] <- nesting
 
     if (importance) {
       imp <- results %>%
-        map(
+        purrr::map(
           ~ .x %>%
-            map_dfr(
-              ~ do.call("rbind", .x %>% map(~ pluck(.x, "imp"))) %>%
+            purrr::map_dfr(
+              ~ do.call(
+                "rbind", .x %>% purrr::map(~ purrr::pluck(.x, "imp"))
+              ) %>%
                 data.frame()
             )
         ) %>%
-        map2_dfr(names(.), ~ .x %>% mutate(nesting = .y))
+        purrr::map2_dfr(names(.), ~ .x %>% dplyr::mutate(nesting = .y))
       colnames(imp)[colnames(imp) == "nesting"] <- nesting
     } else imp <- NULL
 
     if (test) {
       mean <- mean %>%
-        mutate(
-          n = map_int(data, nrow),
+        dplyr::mutate(
+          n = purrr::map_int(data, nrow),
           ptest = ptesting,
           ntest = floor(ptest * n),
           pvalue = 1 - pbinom(

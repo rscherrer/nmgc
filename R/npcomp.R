@@ -30,9 +30,9 @@ npcomp <- function(
     data <- list(data) else data <- data %>% split(.[[nesting]])
   }
   data <- data %>%
-    map(
+    purrr::map(
       ~ .x %>%
-        dplyr::select(all_of(variables)) %>%
+        dplyr::select(dplyr::all_of(variables)) %>%
         prcomp(center = center, scale = scale)
     )
 
@@ -43,19 +43,19 @@ npcomp <- function(
   if (combine) {
 
     sdev <- data %>%
-      map_dfr(
+      purrr::map_dfr(
         ~ (.x$sdev / sum(.x$sdev))[reduce] %>% rbind %>% data.frame,
         .id = nesting
       )
     colnames(sdev) <- c(nesting, paste0("PC", reduce))
     rotation <- data %>%
-      map_dfr(
+      purrr::map_dfr(
         ~ .x$rotation[, reduce] %>%
           data.frame %>%
-          rownames_to_column("variable"),
+          tibble::rownames_to_column("variable"),
         .id = nesting
       )
-    x <- data %>% map_dfr(~ .x$x[, reduce] %>% data.frame, .id = nesting)
+    x <- data %>% purrr::map_dfr(~ .x$x[, reduce] %>% data.frame, .id = nesting)
     out <- list(sdev = sdev, rotation = rotation, x = x)
 
   }
