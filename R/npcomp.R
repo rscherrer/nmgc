@@ -25,7 +25,9 @@ npcomp <- function(
 ) {
 
   if (is.null(nesting)) {
-    data <- list(data) else data <- data %>% split(.[[nesting]])
+    data <- list(data)
+  } else {
+    data <- data %>% split(.[[nesting]])
   }
   data <- data %>%
     purrr::map(
