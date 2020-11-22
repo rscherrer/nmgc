@@ -212,14 +212,22 @@ classify <- function(
     })
   })
 
+  # If the results of many machines must be summarized...
   if (digest) {
 
+    # Extract all confusion matrices
     confs <- results %>% purrr::map(~ purrr::map(.x, ~ purrr::map(.x, "conf")))
+
+    # Compute the average confusion matrix
     avg <- confs %>% purrr::map(~ mavg(.x %>% purrr::map(mavg)))
+
+    # Measure accuracy scores from all matrices
     accu <- confs %>%
       purrrr::map(~ do.call("c" , .x)) %>%
       purrr::map_dfr(~ purrr::map_dbl(.x, pdiag)) %>%
       tidyr::gather(key = "nesting", value = "accu")
+
+    # Compute the mean accuracy for each nesting level
     mean <- accu %>%
       dplyr::group_by(nesting) %>%
       dplyr::summarize(accu = mean(accu))
