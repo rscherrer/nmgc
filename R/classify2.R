@@ -207,7 +207,7 @@ classify <- function(
         }
 
         # Predict the labels of the remaining data
-        predictions <- predict(machine, newdata = data[groups == j, variables])
+        predictions <- rminer::predict(machine, newdata = data[groups == j, variables])
 
         if (method == "LDA") predictions <- predictions$class
 
