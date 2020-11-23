@@ -39,7 +39,7 @@
 #'
 #' @export
 
-classify <- function(
+classify2 <- function(
   data,
   variables,
   grouping,
@@ -262,73 +262,78 @@ classify <- function(
       ntested = purrr::map_int(confmat, sum)
     )
 
-  # If the results of many machines must be summarized...
-  if (digest) {
+  # Summarize accuracy across machines for each replicate
+  res2 <- res %>%
+    dplyr::group_by(lvl, repl) %>%
+    tidyr::nest() %>%
+    dplyr::mutate(
 
-    # Summarize accuracy across machines for each replicate
-    res <- res %>%
-      dplyr::group_by(lvl, repl) %>%
-      purrr::nest() %>%
-      dplyr::mutate(
+      # Summed confusion matrix
+      confmat = purrr::map(data, ~ Reduce('+', .x$confmat)),
 
-        # Summed confusion matrix
-        confmat = purrr::map(data, ~ Reduce('+', .x$confmat)),
+      # Total accuracy
+      accuracy = purrr::map_dbl(confmat, pdiag),
 
-        # Total accuracy
-        accuracy = purrr::map_dbl(confmat, pdiag),
+      # Number of tested points (= sample size of each nesting level)
+      ntested = purrr::map_int(confmat, sum),
 
-        # Number of tested points (= sample size of each nesting level)
-        ntested = purrr::map_int(confmat, sum),
+      # Is accuracy greater than expected by chance? (one-tailed binomial)
+      pvalue = purrr::map2_dbl(
+        confmat, ntested,
+        ~ binom.test(
+          x = sum(diag(.x)),
+          p = 1 / length(labels),
+          n = .y,
+          alternative = "greater"
+        )$p.value
+      )
 
-        # Is accuracy greater than expected by chance? (one-tailed binomial)
-        pvalue = purrr::map2_dbl(
-          confmat, ntested,
-          ~ binom.test(
-            x = sum(diag(.x)),
-            p = 1 / length(labels),
-            n = .y,
-            alternative = "greater"
-          )$p.value
-        )
+    ) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(-data)
 
-      ) %>%
-      dplyr::ungroup() %>%
-      dplyr::select(-data)
+  # Summarize the results over replicates for each nesting level
+  # P-values are combined using the Z-transform test
+  res2 <- res2 %>%
+    dplyr::mutate(
 
-    # Summarize the results over replicates for each nesting level
-    # P-values are combined using the Z-transform test
-    res <- res %>%
-      dplyr::mutate(
+      # Convert one-tailed P-values into Z-scores
+      zvalue = qnorm(p = pvalue, mean = 0, sd = 1)
 
-        # Convert one-tailed P-values into Z-scores
-        zvalue = qnorm(p = pvalue, mean = 0, sd = 1)
+    ) %>%
+    dplyr::group_by(lvl) %>%
+    tidyr::nest() %>%
+    dplyr::mutate(
 
-      ) %>%
-      dplyr::group_by(lvl) %>%
-      tidyr::nest() %>%
-      dplyr::mutate(
+      # Average confusion matrix
+      confmat = purrr::map(data, ~ mavg(.x$confmat)),
 
-        # Average confusion matrix
-        confmat = purrr::map(data, ~ mavg(.x$confmat)),
+      # Average accuracy
+      mean = purrr::map_dbl(data, ~ mean(.x$accuracy)),
 
-        # Average accuracy
-        mean = purrr::map_dbl(data, ~ mean(.x$accuracy)),
+      # Standard error of accuracy
+      stderr = purrr::map_dbl(data, ~ sqrt(var(.x$accuracy) / dplyr::n())),
 
-        # Standard error of accuracy
-        stderr = purrr::map_dbl(data, ~ sqrt(var(.x$accuracy) / dplyr::n())),
+      # Stouffer's Z-statistic
+      zs = purrr::map_dbl(data, ~ sum(.x$zvalue) / sqrt(dplyr::n())),
 
-        # Stouffer's Z-statistic
-        zs = purrr::map_dbl(data, ~ sum(.x$zvalue) / sqrt(dplyr::n())),
+      # Combined P-value over replicates
+      pcombined = purrr::map_dbl(zs, pnorm, mean = 0, sd = 1)
 
-        # Combined P-value over replicates
-        pcombined = purrr::map_dbl(zs, pnorm, mean = 0, sd = 1)
-
-      ) %>%
-      dplyr::select(-data) %>%
-      dplyr::ungroup()
-
-  }
+    ) %>%
+    dplyr::select(-data) %>%
+    dplyr::ungroup()
 
   return(res)
+
+  # Make this function return a list of three things:
+  # a data frame with the output for each machine
+  # a digested data frame with summarized results
+  # a data frame with the results of the sensitivity analysis
+
+  # Problem: SVM and sensitivity analysis do not work anymore...
+  # Implement tests? or a separate script with example data?
+
+  # First read on how to test a package in R
 
 }
