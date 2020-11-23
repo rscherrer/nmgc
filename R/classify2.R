@@ -16,7 +16,6 @@
 #' @param verbose Whether to display messages
 #' @param pb Whether to display progress bars
 #' @param digest Whether to return the results in a summarized format
-#' @param test Whether to test the results against random guessing using a binomial distribution
 #' @param to_pcomp Variable to perform PCA on
 #' @param center Center the PCA
 #' @param scale Scale the PCA
@@ -55,12 +54,14 @@ classify <- function(
   verbose = TRUE,
   pb = TRUE,
   digest = TRUE,
-  test = TRUE,
   to_pcomp = NULL,
   center = TRUE,
   scale = TRUE,
   add_signif = TRUE
 ) {
+
+  # Convert the dataset into a tibble if it is not already one
+  if (!inherits(data, "tbl")) data <- tibble::as_tibble(data)
 
   # Compute principal components if needed
   if (!is.null(to_pcomp)) {
@@ -83,7 +84,7 @@ classify <- function(
   assertthat::assert_that(floor(ptesting * nrow(data)) > 0)
 
   # Define the possible labels
-  labels <- unique(data[, grouping])
+  labels <- unique(data[[grouping]])
 
   nested <- TRUE
 
@@ -94,7 +95,7 @@ classify <- function(
     nesting <- "nesting"
   }
 
-  # Split the data into each nesting level
+  # Split the data into nesting levels
   data <- data %>% split(f = .[, nesting])
 
   # Decide on a looping function depending on whether we want a progress bar
@@ -109,7 +110,7 @@ classify <- function(
   }
 
   # For each nesting level...
-  results <- thislapply1(data, function(data) {
+  machines <- thislapply1(data, function(data) {
 
     # For each replicate...
     thislapply2(seq(nrep), function(i) {
@@ -207,76 +208,124 @@ classify <- function(
         }
 
         # Predict the labels of the remaining data
-        predictions <- rminer::predict(machine, newdata = data[groups == j, variables])
+        predictions <- rminer::predict(
+          machine, newdata = data[groups == j, variables]
+        )
 
         if (method == "LDA") predictions <- predictions$class
 
         # Compare true and predicted labels
-        conf <- table(predictions, data[groups == j, grouping])
+        conf <- table(predictions, data[[grouping]][groups == j])
 
         if (!return_machine) machine <- NULL
 
-        return (list(conf = conf, imp = imp, machine = machine))
+        # Return the confusion matrix, the results of the importance analysis
+        # and the machine itself, if needed
+        return (list(confmat = conf, importance = imp, machine = machine))
 
-      })
-    })
-  })
+      }) # end of cross-validation bin
+    }) # end of replicate
+  }) # end of nesting level
+
+  # Prepare a data frame with results for each machine
+  res <- expand_grid(lvl = names(data), repl = seq(nrep), kbin = seq(k))
+
+  # Fill in that data frame with the output of each machine
+  res <- res %>%
+    group_by(lvl, repl, kbin) %>%
+    nest() %>%
+    mutate(
+
+      # Confusion matrix
+      confmat = pmap(
+        list(lvl, repl, kbin), ~ pluck(machines, ..1, ..2, ..3)$confmat
+      ),
+
+      # Vector of importance scores
+      importance = pmap(
+        list(lvl, repl, kbin), ~ pluck(machines, ..1, ..2, ..3)$importance
+      ),
+
+      # Fitted machine
+      machine = pmap(
+        list(lvl, repl, kbin), ~ pluck(machines, ..1, ..2, ..3)$machine
+      )
+
+    ) %>%
+    select(-data) %>%
+    ungroup() %>%
+    mutate(
+      accuracy = map_dbl(confmat, pdiag),
+      ntested = map_int(confmat, sum)
+    )
 
   # If the results of many machines must be summarized...
   if (digest) {
 
-    # Extract all confusion matrices
-    confs <- results %>% purrr::map(~ purrr::map(.x, ~ purrr::map(.x, "conf")))
+    # Summarize accuracy across machines for each replicate
+    res <- res %>%
+      group_by(lvl, repl) %>%
+      nest() %>%
+      mutate(
 
-    # Compute the average confusion matrix
-    avg <- confs %>% purrr::map(~ mavg(.x %>% purrr::map(mavg)))
+        # Summed confusion matrix
+        confmat = map(data, ~ Reduce('+', .x$confmat)),
 
-    # Measure accuracy scores from all matrices
-    accu <- confs %>%
-      purrrr::map(~ do.call("c" , .x)) %>%
-      purrr::map_dfr(~ purrr::map_dbl(.x, pdiag)) %>%
-      tidyr::gather(key = "nesting", value = "accu")
+        # Total accuracy
+        accuracy = map_dbl(confmat, pdiag),
 
-    # Compute the mean accuracy for each nesting level
-    mean <- accu %>%
-      dplyr::group_by(nesting) %>%
-      dplyr::summarize(accu = mean(accu))
+        # Number of tested points (= sample size of each nesting level)
+        ntested = map_int(confmat, sum),
 
-    colnames(accu)[colnames(accu) == "nesting"] <- nesting
-    colnames(mean)[colnames(mean) == "nesting"] <- nesting
-
-    if (importance) {
-      imp <- results %>%
-        purrr::map(
-          ~ .x %>%
-            purrr::map_dfr(
-              ~ do.call(
-                "rbind", .x %>% purrr::map(~ purrr::pluck(.x, "imp"))
-              ) %>%
-                data.frame()
-            )
-        ) %>%
-        purrr::map2_dfr(names(.), ~ .x %>% dplyr::mutate(nesting = .y))
-      colnames(imp)[colnames(imp) == "nesting"] <- nesting
-    } else imp <- NULL
-
-    if (test) {
-      mean <- mean %>%
-        dplyr::mutate(
-          n = purrr::map_int(data, nrow),
-          ptest = ptesting,
-          ntest = floor(ptest * n),
-          pvalue = 1 - pbinom(
-            accu * ntest, size = ntest, prob = 1 / length(labels)
-          )
+        # Is accuracy greater than expected by chance? (one-tailed binomial)
+        pvalue = map2_dbl(
+          confmat, ntested,
+          ~ binom.test(
+            x = sum(diag(.x)),
+            p = 1 / length(labels),
+            n = .y,
+            alternative = "greater"
+          )$p.value
         )
-      if (add_signif) mean <- mean %>% add_signif()
-    }
 
-    return (list(mean = mean, avg = avg, accu = accu, confs = confs, imp = imp))
+      ) %>%
+      ungroup() %>%
+      select(-data)
+
+    # Summarize the results over replicates for each nesting level
+    # P-values are combined using the Z-transform test
+    res <- res %>%
+      mutate(
+
+        # Convert one-tailed P-values into Z-scores
+        zvalue = qnorm(p = pvalue, mean = 0, sd = 1)
+
+      ) %>%
+      group_by(lvl) %>%
+      nest() %>%
+      mutate(
+
+        # Average confusion matrix
+        confmat = map(data, ~ mavg(.x$confmat)),
+
+        # Average accuracy
+        mean = map_dbl(data, ~ mean(.x$accuracy)),
+
+        # Standard error of accuracy
+        stderr = map_dbl(data, ~ sqrt(var(.x$accuracy) / n())),
+
+        # Stouffer's Z-statistic
+        zs = map_dbl(data, ~ sum(.x$zvalue) / sqrt(n())),
+
+        # Combined P-value over replicates
+        pcombined = map_dbl(zs, pnorm, mean = 0, sd = 1)
+
+      ) %>%
+      select(-data) %>%
+      ungroup()
 
   }
 
-  return (results)
+  return (res)
 
 }
