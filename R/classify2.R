@@ -15,27 +15,15 @@
 #' @param return_machine Whether to return the machines (takes space)
 #' @param verbose Whether to display messages
 #' @param pb Whether to display progress bars
-#' @param digest Whether to return the results in a summarized format
 #' @param to_pcomp Variable to perform PCA on
 #' @param center Center the PCA
 #' @param scale Scale the PCA
-#' @param add_signif Whether to add significance asterisk labels in an extra column
 #'
-#' @return A list containing the results. If `digest` is `FALSE`, a nested list on two levels with, for each replicate (first level) cross-validation bin (second level), i.e. for each machine, the following fields:
-#' \itemize{
-#' \item{`conf`}{ The confusion matrix resulting from testing the machine}
-#' \item{`imp`}{ A vector of relative importance of input variable}
-#' \item{`machine`}{ The machine itself}
-#' }
-#' or a list of such nested lists if `nesting` is provided, with one nested list per subset of the data.
-#' If `digest` is TRUE, returns a list with the following fields:
-#' \itemize{
-#' \item{`mean`}{ A data frame with a column "accu" containing the mean accuracy across all machines on a single row, or accuracies over subsets of the data on multiple rows if `nesting` is provided. If `test` is `TRUE`, extra columns are added, containing the number of observations, "n", the proportion of observations used in testing the machines, "ptest", the number of observations in a testing set, "ntest", the binomial P-value assessing the significance of the obtained result, "pvalue".}
-#' \item{`avg`}{ The average over replicates of the average confusion matrices over cross-validation bins, or a list of those if `nesting` is provided}
-#' \item{`accu`}{ A vector of classification accuracy across all machines, or a data frame with a column for the nesting variable if `nesting` is provided}
-#' \item{`confs`}{ A nested list on two levels of confusion matrices, per replicate and cross-validation bin, or a list of such nested lists if `nesting` is provided}
-#' \item{`imp`}{ A data frame with the relative importance of each input variable for each machine, with an extra column with a nesting variable if `nesting` is provided}
-#' }
+#' @return A list of two tibbles.
+#'
+#' The first tibble, `full`, contains information about each fitted machine in the analysis, including its nesting level `nesting`, replicate number `repl` and cross-validation bin `kbin` but also classification testing outputs such as its confusion matrix `confmat`, its prediction `accuracy` and the number of observations in the testing set `ntested`. If `return_machine` is TRUE, an extra column is added, that is a list of the actual fitted machines. If `importance` is TRUE, extra columns are added, named after the input variables and containing their respective relative importance scores (these are computed using the `rminer::Importance` function for one-dimensional sensitivity analysis).
+#'
+#' The second tibble, `digested`, is a summary with, for each `nesting` level: the average confusion matrix `confmat` over all `nrep` replicate total confusion matrices (which are sums of `k` confusion matrices, one per cross-validation bin), the `mean` accuracy and its standard error `stderr` across replicates, Stouffer's Z-statistic `zs` used to combine P-values from binomial tests for each replicate (using the Z-transform method, see Whitlock 2005) and the corresponding combine P-value `pcombined`.
 #'
 #' @export
 
@@ -53,11 +41,9 @@ classify2 <- function(
   return_machine = FALSE,
   verbose = TRUE,
   pb = TRUE,
-  digest = TRUE,
   to_pcomp = NULL,
   center = TRUE,
-  scale = TRUE,
-  add_signif = TRUE
+  scale = TRUE
 ) {
 
   # Convert the dataset into a tibble if it is not already one
@@ -228,29 +214,29 @@ classify2 <- function(
   }) # end of nesting level
 
   # Prepare a data frame with results for each machine
-  res <- tidyr::expand_grid(lvl = names(data), repl = seq(nrep), kbin = seq(k))
+  res <- tidyr::expand_grid(nesting = names(data), repl = seq(nrep), kbin = seq(k))
 
   # Fill in that data frame with the output of each machine
   res <- res %>%
-    dplyr::group_by(lvl, repl, kbin) %>%
+    dplyr::group_by(nesting, repl, kbin) %>%
     tidyr::nest() %>%
     dplyr::mutate(
 
       # Confusion matrix
       confmat = purrr::pmap(
-        list(lvl, repl, kbin),
+        list(nesting, repl, kbin),
         ~ purrr::pluck(machines, ..1, ..2, ..3)$confmat
       ),
 
       # Vector of importance scores
       importance = purrr::pmap(
-        list(lvl, repl, kbin),
+        list(nesting, repl, kbin),
         ~ purrr::pluck(machines, ..1, ..2, ..3)$importance
       ),
 
       # Fitted machine
       machine = purrr::pmap(
-        list(lvl, repl, kbin),
+        list(nesting, repl, kbin),
         ~ purrr::pluck(machines, ..1, ..2, ..3)$machine
       )
 
@@ -263,8 +249,8 @@ classify2 <- function(
     )
 
   # Summarize accuracy across machines for each replicate
-  res2 <- res %>%
-    dplyr::group_by(lvl, repl) %>%
+  smr <- res %>%
+    dplyr::group_by(nesting, repl) %>%
     tidyr::nest() %>%
     dplyr::mutate(
 
@@ -294,14 +280,14 @@ classify2 <- function(
 
   # Summarize the results over replicates for each nesting level
   # P-values are combined using the Z-transform test
-  res2 <- res2 %>%
+  smr <- smr %>%
     dplyr::mutate(
 
       # Convert one-tailed P-values into Z-scores
       zvalue = qnorm(p = pvalue, mean = 0, sd = 1)
 
     ) %>%
-    dplyr::group_by(lvl) %>%
+    dplyr::group_by(nesting) %>%
     tidyr::nest() %>%
     dplyr::mutate(
 
@@ -324,16 +310,22 @@ classify2 <- function(
     dplyr::select(-data) %>%
     dplyr::ungroup()
 
-  return(res)
+  # If the sensitivity analysis was conducted...
+  if (importance) {
 
-  # Make this function return a list of three things:
-  # a data frame with the output for each machine
-  # a digested data frame with summarized results
-  # a data frame with the results of the sensitivity analysis
+    # Place importance scores in multiple columns, one per variable
+    res <- res %>%
+      dplyr::bind_cols(purrr::map_dfr(res$importance, ~ .x))
 
-  # Problem: SVM and sensitivity analysis do not work anymore...
-  # Implement tests? or a separate script with example data?
+  }
 
-  # First read on how to test a package in R
+  # Remove the importance column from the output
+  res <- res %>% dplyr::select(-importance)
+
+  # Remove the machine column if the fitted model must not be returned
+  if (!return_machine) res <- res %>% dplyr::select(-machine)
+
+  # Return the full and summarized results
+  return(c(full = res, digested = smr))
 
 }

@@ -1,8 +1,5 @@
-data <- read.csv("../DewlapColorAnolis/data/reflectance.csv")
+rm(list = ls())
 
 library(nmgc)
+library(tidyverse)
 
-variables <- paste0("wl", c(300, 400, 700))
-
-nanova(data, variables, grouping = "habitat", nesting = "island",
-       univariate = TRUE, parametric = TRUE, random = "site")
