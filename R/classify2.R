@@ -228,35 +228,38 @@ classify <- function(
   }) # end of nesting level
 
   # Prepare a data frame with results for each machine
-  res <- expand_grid(lvl = names(data), repl = seq(nrep), kbin = seq(k))
+  res <- tidyr::expand_grid(lvl = names(data), repl = seq(nrep), kbin = seq(k))
 
   # Fill in that data frame with the output of each machine
   res <- res %>%
-    group_by(lvl, repl, kbin) %>%
-    nest() %>%
-    mutate(
+    dplyr::group_by(lvl, repl, kbin) %>%
+    tidyr::nest() %>%
+    dplyr::mutate(
 
       # Confusion matrix
-      confmat = pmap(
-        list(lvl, repl, kbin), ~ pluck(machines, ..1, ..2, ..3)$confmat
+      confmat = purrr::pmap(
+        list(lvl, repl, kbin),
+        ~ purrr::pluck(machines, ..1, ..2, ..3)$confmat
       ),
 
       # Vector of importance scores
-      importance = pmap(
-        list(lvl, repl, kbin), ~ pluck(machines, ..1, ..2, ..3)$importance
+      importance = purrr::pmap(
+        list(lvl, repl, kbin),
+        ~ purrr::pluck(machines, ..1, ..2, ..3)$importance
       ),
 
       # Fitted machine
-      machine = pmap(
-        list(lvl, repl, kbin), ~ pluck(machines, ..1, ..2, ..3)$machine
+      machine = purrr::pmap(
+        list(lvl, repl, kbin),
+        ~ purrr::pluck(machines, ..1, ..2, ..3)$machine
       )
 
     ) %>%
-    select(-data) %>%
-    ungroup() %>%
-    mutate(
-      accuracy = map_dbl(confmat, pdiag),
-      ntested = map_int(confmat, sum)
+    dplyr::select(-data) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(
+      accuracy = purrr::map_dbl(confmat, pdiag),
+      ntested = purrr::map_int(confmat, sum)
     )
 
   # If the results of many machines must be summarized...
@@ -264,21 +267,21 @@ classify <- function(
 
     # Summarize accuracy across machines for each replicate
     res <- res %>%
-      group_by(lvl, repl) %>%
-      nest() %>%
-      mutate(
+      dplyr::group_by(lvl, repl) %>%
+      purrr::nest() %>%
+      dplyr::mutate(
 
         # Summed confusion matrix
-        confmat = map(data, ~ Reduce('+', .x$confmat)),
+        confmat = purrr::map(data, ~ Reduce('+', .x$confmat)),
 
         # Total accuracy
-        accuracy = map_dbl(confmat, pdiag),
+        accuracy = purrr::map_dbl(confmat, pdiag),
 
         # Number of tested points (= sample size of each nesting level)
-        ntested = map_int(confmat, sum),
+        ntested = purrr::map_int(confmat, sum),
 
         # Is accuracy greater than expected by chance? (one-tailed binomial)
-        pvalue = map2_dbl(
+        pvalue = purrr::map2_dbl(
           confmat, ntested,
           ~ binom.test(
             x = sum(diag(.x)),
@@ -289,43 +292,43 @@ classify <- function(
         )
 
       ) %>%
-      ungroup() %>%
-      select(-data)
+      dplyr::ungroup() %>%
+      dplyr::select(-data)
 
     # Summarize the results over replicates for each nesting level
     # P-values are combined using the Z-transform test
     res <- res %>%
-      mutate(
+      dplyr::mutate(
 
         # Convert one-tailed P-values into Z-scores
         zvalue = qnorm(p = pvalue, mean = 0, sd = 1)
 
       ) %>%
-      group_by(lvl) %>%
-      nest() %>%
-      mutate(
+      dplyr::group_by(lvl) %>%
+      tidyr::nest() %>%
+      dplyr::mutate(
 
         # Average confusion matrix
-        confmat = map(data, ~ mavg(.x$confmat)),
+        confmat = purrr::map(data, ~ mavg(.x$confmat)),
 
         # Average accuracy
-        mean = map_dbl(data, ~ mean(.x$accuracy)),
+        mean = purrr::map_dbl(data, ~ mean(.x$accuracy)),
 
         # Standard error of accuracy
-        stderr = map_dbl(data, ~ sqrt(var(.x$accuracy) / n())),
+        stderr = purrr::map_dbl(data, ~ sqrt(var(.x$accuracy) / dplyr::n())),
 
         # Stouffer's Z-statistic
-        zs = map_dbl(data, ~ sum(.x$zvalue) / sqrt(n())),
+        zs = purrr::map_dbl(data, ~ sum(.x$zvalue) / sqrt(dplyr::n())),
 
         # Combined P-value over replicates
-        pcombined = map_dbl(zs, pnorm, mean = 0, sd = 1)
+        pcombined = purrr::map_dbl(zs, pnorm, mean = 0, sd = 1)
 
       ) %>%
-      select(-data) %>%
-      ungroup()
+      dplyr::select(-data) %>%
+      dplyr::ungroup()
 
   }
 
-  return (res)
+  return(res)
 
 }
