@@ -207,7 +207,9 @@ classify <- function(
         }
 
         # Predict the labels of the remaining data
-        predictions <- predict(machine, newdata = data[groups == j, variables])
+        predictions <- rminer::predict(
+          machine, newdata = data[groups == j, variables]
+        )
 
         if (method == "LDA") predictions <- predictions$class
 
@@ -233,7 +235,7 @@ classify <- function(
 
     # Measure accuracy scores from all matrices
     accu <- confs %>%
-      purrrr::map(~ do.call("c" , .x)) %>%
+      purrr::map(~ do.call("c" , .x)) %>%
       purrr::map_dfr(~ purrr::map_dbl(.x, pdiag)) %>%
       tidyr::gather(key = "nesting", value = "accu")
 

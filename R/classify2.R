@@ -326,6 +326,6 @@ classify2 <- function(
   if (!return_machine) res <- res %>% dplyr::select(-machine)
 
   # Return the full and summarized results
-  return(c(full = res, digested = smr))
+  return(list(full = res, digested = smr))
 
 }
