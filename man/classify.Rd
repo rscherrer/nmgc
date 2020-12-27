@@ -34,14 +34,15 @@ classify(
   hfill = "seagreen",
   halpha = 0.5,
   cxlim = c(0, 0.35),
-  cylim = c(0.5, 0.8),
+  cylim = c(0.6, 1),
   blty = 1,
   prounding = 4,
   ptoshow = "prandom",
   psignif = 0.05,
   px = 1,
-  py = 3,
-  phjust = 1
+  py = 0.9,
+  phjust = 1,
+  psize = 3
 )
 }
 \arguments{
@@ -115,9 +116,11 @@ classify(
 
 \item{px}{Horizontal location of the P-values}
 
-\item{py}{Vertical location of the P-values}
+\item{py}{Vertical location of the P-values (in proportion of the height of the plot)}
 
 \item{phjust}{Horizontal justification of the P-values (e.g. 1 to align them to the right, 0 to the left and 0.5 to center them)}
+
+\item{psize}{Font size of the P-values on display}
 }
 \value{
 If \code{digest} is FALSE, this function returns a nested list of raw classification results on three levels. The first level is for each separate plot, or nesting level, in the nested analysis. The second level is for each replicate analysis within each plot. The third level is for each machine, i.e. each cross-validation bin within each replicate. This third level is itself a list with for each machine, the confusion matrix from the classification (\code{conf}), a vector of importance scores for each variable from the sensitivity analysis (\code{imp}, only if \code{importance} is TRUE) and the trained machine itself (\code{machine}, only if \code{getmachine} is TRUE). These are the raw results for each machine. If \code{digest} is TRUE, however, the function returns a summarized version of the results. The output is then a list with three fields. The first field is a summary table (\code{summary}) of the results with, for each nesting level, the mean accuracy score (\code{accu}), the sample size (\code{n}, the total number of points tested within each replicate), the proportion of the data used for testing (\code{ptest}, which depends on \code{k}), the number of points tested by each machine (\code{ntest}), the P-value from a binomial test assessing the significance of the average accuracy score (\code{pbinom}) and the P-value from an equivalent randomization test (\code{prandom}), where the null distribution is computed by training \code{nperm} replicates on permuted data. There are three additional list-columns with, for each nesting level, the average confusion matrix over all replicates (\code{conf}), a data frame of importance scores (\code{imp}) for each variable (in columns) for each machine (in rows), and a vector of acccuracy scores (\code{accus}) where the \code{nrep} first values are for the replicates and the remaining \code{nperm} were measured on randomized data. Note that accuracy scores are measured by summing the confusion matrices of all cross-validation bins into one, yielding one score per replicate.

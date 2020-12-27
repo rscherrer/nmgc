@@ -37,8 +37,9 @@
 #' @param prounding Number of decimal places to round P-values on display
 #' @param psignif Significance level for P-values on display. An asterisk will be added to each significant P-value. Use zero to avoid displaying any asterisk.
 #' @param px Horizontal location of the P-values
-#' @param py Vertical location of the P-values
+#' @param py Vertical location of the P-values (in proportion of the height of the plot)
 #' @param phjust Horizontal justification of the P-values (e.g. 1 to align them to the right, 0 to the left and 0.5 to center them)
+#' @param psize Font size of the P-values on display
 #'
 #' @return If `digest` is FALSE, this function returns a nested list of raw classification results on three levels. The first level is for each separate plot, or nesting level, in the nested analysis. The second level is for each replicate analysis within each plot. The third level is for each machine, i.e. each cross-validation bin within each replicate. This third level is itself a list with for each machine, the confusion matrix from the classification (`conf`), a vector of importance scores for each variable from the sensitivity analysis (`imp`, only if `importance` is TRUE) and the trained machine itself (`machine`, only if `getmachine` is TRUE). These are the raw results for each machine. If `digest` is TRUE, however, the function returns a summarized version of the results. The output is then a list with three fields. The first field is a summary table (`summary`) of the results with, for each nesting level, the mean accuracy score (`accu`), the sample size (`n`, the total number of points tested within each replicate), the proportion of the data used for testing (`ptest`, which depends on `k`), the number of points tested by each machine (`ntest`), the P-value from a binomial test assessing the significance of the average accuracy score (`pbinom`) and the P-value from an equivalent randomization test (`prandom`), where the null distribution is computed by training `nperm` replicates on permuted data. There are three additional list-columns with, for each nesting level, the average confusion matrix over all replicates (`conf`), a data frame of importance scores (`imp`) for each variable (in columns) for each machine (in rows), and a vector of acccuracy scores (`accus`) where the `nrep` first values are for the replicates and the remaining `nperm` were measured on randomized data. Note that accuracy scores are measured by summing the confusion matrices of all cross-validation bins into one, yielding one score per replicate.
 #'
@@ -75,14 +76,15 @@ classify <- function(
   hfill = "seagreen",
   halpha = 0.5,
   cxlim = c(0, 0.35),
-  cylim = c(0.5, 0.8),
+  cylim = c(0.6, 1),
   blty = 1,
   prounding = 4,
   ptoshow = "prandom",
   psignif = 0.05,
   px = 1,
-  py = 3,
-  phjust = 1
+  py = 0.9,
+  phjust = 1,
+  psize = 3
 
 ) {
 
@@ -512,7 +514,8 @@ classify <- function(
     p2 <- p2 +
       ggplot2::geom_text(
         data = digested,
-        ggplot2::aes(label = plabel), x = px, y = py, hjust = phjust
+        ggplot2::aes(label = plabel), x = px, y = py * ymax, hjust = phjust,
+        size = psize
       )
 
   }
