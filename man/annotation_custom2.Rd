@@ -16,7 +16,7 @@ annotation_custom2(
 \arguments{
 \item{grob}{The grob}
 
-\item{xmin}{Inset plot coordinates}
+\item{xmin, xmax, ymin, ymax}{Inset plot coordinates}
 
 \item{data}{The underlying data
 

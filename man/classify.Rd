@@ -12,18 +12,36 @@ classify(
   method = "SVM",
   k = 5,
   nrep = 1,
+  nperm = 0,
   minsize = 5,
   seed = NULL,
   importance = FALSE,
-  return_machine = FALSE,
+  getmachine = FALSE,
   verbose = TRUE,
   pb = TRUE,
   digest = TRUE,
-  test = TRUE,
-  to_pcomp = NULL,
-  center = TRUE,
-  scale = TRUE,
-  add_signif = TRUE
+  topcomp = NULL,
+  pccenter = TRUE,
+  pcscale = TRUE,
+  showconf = TRUE,
+  showbinom = TRUE,
+  showpval = TRUE,
+  cnorm = 2,
+  clims = c(0, 1),
+  clow = "white",
+  chigh = "darkgreen",
+  hbins = 30,
+  hfill = "seagreen",
+  halpha = 0.5,
+  cxlim = c(0, 0.35),
+  cylim = c(0.5, 0.8),
+  blty = 1,
+  prounding = 4,
+  ptoshow = "prandom",
+  psignif = 0.05,
+  px = 1,
+  py = 3,
+  phjust = 1
 )
 }
 \arguments{
@@ -41,46 +59,68 @@ classify(
 
 \item{nrep}{Number of replicate analyses (i.e. number of k-fold cross validations)}
 
+\item{nperm}{Number of permutations in the randomization test. Use 0 to not conduct a randomization test.}
+
 \item{minsize}{Minimum size required per group for a training data set}
 
 \item{seed}{Optional random seed to reset at the beginning}
 
 \item{importance}{Whether to perform sensitivity analysis on the input (takes a while)}
 
-\item{return_machine}{Whether to return the machines (takes space)}
+\item{getmachine}{Whether to return the machines (takes space)}
 
 \item{verbose}{Whether to display messages}
 
 \item{pb}{Whether to display progress bars}
 
-\item{digest}{Whether to return the results in a summarized format}
+\item{digest}{Whether to return the results in a summarized format. If FALSE, returns the raw results for each machine.}
 
-\item{test}{Whether to test the results against random guessing using a binomial distribution}
+\item{topcomp}{Variable to perform PCA on}
 
-\item{to_pcomp}{Variable to perform PCA on}
+\item{pccenter}{Center the PCA}
 
-\item{center}{Center the PCA}
+\item{pcscale}{Scale the PCA}
 
-\item{scale}{Scale the PCA}
+\item{showconf}{Whether to show confusion matrices as insets on accuracy histograms}
 
-\item{add_signif}{Whether to add significance asterisk labels in an extra column}
+\item{showbinom}{Whether to show a binomial null distribution on accuracy histograms}
+
+\item{showpval}{Whether to show P-values on accuracy histograms}
+
+\item{cnorm}{Integer indicating whether to normalize the confusion matrices on display so as to make rows sum to one (1), or columns (2), or neither (0).}
+
+\item{clims}{Limits of the range of frequencies displayed in the confusion matrices}
+
+\item{clow}{Color associated with the lowest frequency in confusion matrix heatmaps}
+
+\item{chigh}{Color associated with the highest frequency in confusion matrix heatmaps}
+
+\item{hbins}{Number of bins in the histogram of accuracy scores}
+
+\item{hfill}{Color of the histogram of accuracy scores}
+
+\item{halpha}{Transparency of the histogram of accuracy scores}
+
+\item{cxlim}{Vector of two values containing the bounds of the inset confusion matrices along the horizontal axis}
+
+\item{cylim}{Vector of two values containing the bounds of the inset confusion matrices along the vertical axis (in proportion of the height of the plot)}
+
+\item{blty}{Line type for displaying the null binomial distribution}
+
+\item{prounding}{Number of decimal places to round P-values on display}
+
+\item{ptoshow}{What P-value to show on the histogram plots (either of "pbinom" for the binomial test or "prandom" for the randomization test)}
+
+\item{psignif}{Significance level for P-values on display. An asterisk will be added to each significant P-value. Use zero to avoid displaying any asterisk.}
+
+\item{px}{Horizontal location of the P-values}
+
+\item{py}{Vertical location of the P-values}
+
+\item{phjust}{Horizontal justification of the P-values (e.g. 1 to align them to the right, 0 to the left and 0.5 to center them)}
 }
 \value{
-A list containing the results. If \code{digest} is \code{FALSE}, a nested list on two levels with, for each replicate (first level) cross-validation bin (second level), i.e. for each machine, the following fields:
-\itemize{
-\item{\code{conf}}{ The confusion matrix resulting from testing the machine}
-\item{\code{imp}}{ A vector of relative importance of input variable}
-\item{\code{machine}}{ The machine itself}
-}
-or a list of such nested lists if \code{nesting} is provided, with one nested list per subset of the data.
-If \code{digest} is TRUE, returns a list with the following fields:
-\itemize{
-\item{\code{mean}}{ A data frame with a column "accu" containing the mean accuracy across all machines on a single row, or accuracies over subsets of the data on multiple rows if \code{nesting} is provided. If \code{test} is \code{TRUE}, extra columns are added, containing the number of observations, "n", the proportion of observations used in testing the machines, "ptest", the number of observations in a testing set, "ntest", the binomial P-value assessing the significance of the obtained result, "pvalue".}
-\item{\code{avg}}{ The average over replicates of the average confusion matrices over cross-validation bins, or a list of those if \code{nesting} is provided}
-\item{\code{accu}}{ A vector of classification accuracy across all machines, or a data frame with a column for the nesting variable if \code{nesting} is provided}
-\item{\code{confs}}{ A nested list on two levels of confusion matrices, per replicate and cross-validation bin, or a list of such nested lists if \code{nesting} is provided}
-\item{\code{imp}}{ A data frame with the relative importance of each input variable for each machine, with an extra column with a nesting variable if \code{nesting} is provided}
-}
+If \code{digest} is FALSE, this function returns a nested list of raw classification results on three levels. The first level is for each separate plot, or nesting level, in the nested analysis. The second level is for each replicate analysis within each plot. The third level is for each machine, i.e. each cross-validation bin within each replicate. This third level is itself a list with for each machine, the confusion matrix from the classification (\code{conf}), a vector of importance scores for each variable from the sensitivity analysis (\code{imp}, only if \code{importance} is TRUE) and the trained machine itself (\code{machine}, only if \code{getmachine} is TRUE). These are the raw results for each machine. If \code{digest} is TRUE, however, the function returns a summarized version of the results. The output is then a list with three fields. The first field is a summary table (\code{summary}) of the results with, for each nesting level, the mean accuracy score (\code{accu}), the sample size (\code{n}, the total number of points tested within each replicate), the proportion of the data used for testing (\code{ptest}, which depends on \code{k}), the number of points tested by each machine (\code{ntest}), the P-value from a binomial test assessing the significance of the average accuracy score (\code{pbinom}) and the P-value from an equivalent randomization test (\code{prandom}), where the null distribution is computed by training \code{nperm} replicates on permuted data. There are three additional list-columns with, for each nesting level, the average confusion matrix over all replicates (\code{conf}), a data frame of importance scores (\code{imp}) for each variable (in columns) for each machine (in rows), and a vector of acccuracy scores (\code{accus}) where the \code{nrep} first values are for the replicates and the remaining \code{nperm} were measured on randomized data. Note that accuracy scores are measured by summing the confusion matrices of all cross-validation bins into one, yielding one score per replicate.
 }
 \description{
 Perform a replicated classification analysis of a multivariate dataset into categorical labels using machine learning tools and k-fold cross validation

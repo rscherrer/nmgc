@@ -3,10 +3,7 @@
 #' Plot inset figures on another grob
 #'
 #' @param grob The grob
-#' @param xmin Inset plot coordinates
-#' @param xmax
-#' @param ymin
-#' @param ymax
+#' @param xmin,xmax,ymin,ymax Inset plot coordinates
 #' @param data The underlying data
 #'
 #' Code for inset plotting from Clare West at https://www.blopig.com/blog/2019/08/combining-inset-plots-with-facets-using-ggplot2/
