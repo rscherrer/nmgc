@@ -366,7 +366,8 @@ classify <- function(
     ggplot2::geom_tile() +
     ggplot2::theme_bw() +
     ggplot2::scale_fill_gradient(low = clow, high = chigh, limits = clims) +
-    ggplot2::labs(x = "True", y = "Predicted", fill = "Frequency")
+    ggplot2::labs(x = "True", y = "Predicted", fill = "Frequency") +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 60, hjust = 1))
 
   # Split into facets if needed
   if (length(unique(confusions$nesting)) > 1) {
